@@ -7,6 +7,7 @@ struct MyApp {}
 
 // Implement App to the empty struct
 impl App for MyApp {
+    // the constructor of the empty struct
     fn init(_: &DeviceHandler, _: AdapterInfo) -> Self { MyApp {} }
 }
 
