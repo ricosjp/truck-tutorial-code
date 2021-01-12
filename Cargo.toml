@@ -15,3 +15,7 @@ truck-rendimpl = "0.1.1" # Visualization of shape and polygon mesh based on truc
 [[bin]]
 name = "section2_1"
 path = "src/section2_1.rs"
+
+[[bin]]
+name = "section2_2"
+path = "src/section2_2.rs"
