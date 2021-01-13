@@ -29,12 +29,9 @@ impl App for MyApp {
         .unwrap();
 
         // Create a light
-        let light = Light {
-            // It is safe to place the camera in the same position as the flash.
-            position: camera.position(),
-            // There are the other options. Look later!
-            ..Default::default()
-        };
+        let mut light = Light::default();
+        // It is safe to place the camera in the same position as the flash.
+        light.position = camera.position();
 
         // Create the scene
         let mut scene = Scene::new(
