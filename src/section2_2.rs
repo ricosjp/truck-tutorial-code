@@ -1,6 +1,5 @@
 mod app; // Load the dropped submodule
 use app::App; // Use the trait app::App
-use std::f64::consts::PI;
 use truck_platform::*;
 use truck_rendimpl::*;
 use wgpu::{AdapterInfo, SwapChainFrame};
