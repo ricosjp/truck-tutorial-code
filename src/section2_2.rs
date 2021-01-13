@@ -13,10 +13,11 @@ struct MyApp {
 // Implement App to the empty struct
 impl App for MyApp {
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
+        let mut camera = Camera::default();
         // Create camera matrix
-        let camera_matrix = Matrix4::look_at(
+        camera.matrix = Matrix4::look_at(
             // camera position
-            Point3::new(6.0, 7.0, 6.0),
+            Point3::new(5.0, 6.0, 5.0),
             // The camera looks to the center of the model.
             Point3::new(0.0, 1.5, 0.0),
             // the y-up coordinate
@@ -27,18 +28,6 @@ impl App for MyApp {
         // while truck uses the "world-centric" theory of moving the camera with respect to the world.
         .invert()
         .unwrap();
-
-        // Create a perspective camera
-        let camera = Camera::perspective_camera(
-            // camera matrix
-            camera_matrix,
-            // the field of view
-            Rad(PI / 4.0),
-            // distance with the near clipping plane
-            0.1,
-            // distance with the far clipping plane
-            100.0,
-        );
 
         // Create a light
         let light = Light {
