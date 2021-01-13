@@ -13,9 +13,9 @@ struct MyApp {
 impl App for MyApp {
     // constructor
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
-        // Use default setting except the posture
+        // Use default setting except position and posture
         let mut camera = Camera::default();
-        // Create camera matrix
+        // specify position and posture
         camera.matrix = Matrix4::look_at(
             // camera position
             Point3::new(5.0, 6.0, 5.0),
