@@ -11,6 +11,7 @@ struct MyApp {
 
 // Implement App to the empty struct
 impl App for MyApp {
+    // constructor
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
         let mut camera = Camera::default();
         // Create camera matrix
