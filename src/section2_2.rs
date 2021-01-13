@@ -13,6 +13,7 @@ struct MyApp {
 impl App for MyApp {
     // constructor
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
+        // Use default setting except the posture
         let mut camera = Camera::default();
         // Create camera matrix
         camera.matrix = Matrix4::look_at(
@@ -29,7 +30,7 @@ impl App for MyApp {
         .invert()
         .unwrap();
 
-        // Create a light
+        // Use default setting except the position
         let mut light = Light::default();
         // It is safe to place the camera in the same position as the flash.
         light.position = camera.position();
