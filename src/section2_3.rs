@@ -39,7 +39,7 @@ impl App for MyApp {
         let red_light = Light {
             // the position of red light
             position: position0,
-            // red light
+            // red
             color: Vector3::new(1.0, 0.0, 0.0),
             // point light
             light_type: LightType::Point,
@@ -49,7 +49,7 @@ impl App for MyApp {
         let green_light = Light {
             // the position of green light
             position: position1,
-            // green light
+            // green
             color: Vector3::new(0.0, 1.0, 0.0),
             // point light
             light_type: LightType::Point,
@@ -59,7 +59,7 @@ impl App for MyApp {
         let blue_light = Light {
             // the position of the third light
             position: position2,
-            // blue light
+            // blue
             color: Vector3::new(0.0, 0.0, 1.0),
             // point light
             light_type: LightType::Point,
@@ -78,7 +78,7 @@ impl App for MyApp {
             &SceneDescriptor {
                 // A scene has only one camera.
                 camera,
-                // The argument is `Vec` since a scene can have several lights.
+                // A scene can have several lights.
                 lights,
                 // There are the other options. Look later!
                 ..Default::default()
@@ -99,17 +99,24 @@ impl App for MyApp {
 
     // This meshod is called every frame
     fn update(&mut self, _handler: &DeviceHandler) {
-        // the time since the application started.
+        // the seconds since the application started.
         let time = self.scene.elapsed().as_secs_f64();
 
         // the mutable references of camera and lights.
         let (camera, lights) = {
+            // Reget the mutable reference of SceneDescriptor.
             let desc = self.scene.descriptor_mut();
+            // the mutable references of camera and lights.
             (&mut desc.camera, &mut desc.lights)
         };
 
         // rotation matrix
-        let rot = Matrix4::from_axis_angle(Vector3::unit_y(), Rad(time));
+        let rot = Matrix4::from_axis_angle(
+            // the axis of rotation
+            Vector3::unit_y(),
+            // 1 radian per second
+            Rad(time),
+        );
 
         // update camera matrix
         camera.matrix = rot
