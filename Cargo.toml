@@ -19,3 +19,7 @@ path = "src/section2_1.rs"
 [[bin]]
 name = "section2_2"
 path = "src/section2_2.rs"
+
+[[bin]]
+name = "section2_3"
+path = "src/section2_3.rs"
