@@ -30,33 +30,43 @@ impl App for MyApp {
         let radius = 5.0 * f64::sqrt(2.0);
         let omega = [0.5, f64::sqrt(3.0) * 0.5];
 
+        // positions of lights
+        let position0 = Point3::new(radius * omega[0], 6.0, radius * omega[1]);
+        let position1 = Point3::new(-radius, 6.0, 0.0);
+        let position2 = Point3::new(radius * omega[0], 6.0, -radius * omega[1]);
+
+        // red light
+        let red_light = Light {
+            // the position of red light
+            position: position0,
+            // red light
+            color: Vector3::new(1.0, 0.0, 0.0),
+            // point light
+            light_type: LightType::Point,
+        };
+
+        // green light
+        let green_light = Light {
+            // the position of green light
+            position: position1,
+            // green light
+            color: Vector3::new(0.0, 1.0, 0.0),
+            // point light
+            light_type: LightType::Point,
+        };
+
+        // blue light
+        let blue_light = Light {
+            // the position of the third light
+            position: position2,
+            // blue light
+            color: Vector3::new(0.0, 0.0, 1.0),
+            // point light
+            light_type: LightType::Point,
+        };
+
         // lights
-        let lights = vec![
-            Light {
-                // the position of the first light
-                position: Point3::new(radius * omega[0], 6.0, radius * omega[1]),
-                // red light
-                color: Vector3::new(1.0, 0.0, 0.0),
-                // point light
-                light_type: LightType::Point,
-            },
-            Light {
-                // the position of the second light
-                position: Point3::new(-radius, 6.0, 0.0),
-                // green light
-                color: Vector3::new(0.0, 1.0, 0.0),
-                // point light
-                light_type: LightType::Point,
-            },
-            Light {
-                // the position of the third light
-                position: Point3::new(radius * omega[0], 6.0, -radius * omega[1]),
-                // blue light
-                color: Vector3::new(0.0, 0.0, 1.0),
-                // point light
-                light_type: LightType::Point,
-            },
-        ];
+        let lights = vec![red_light, green_light, blue_light];
 
         // Create the scene
         let mut scene = Scene::new(
