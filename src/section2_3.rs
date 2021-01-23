@@ -16,20 +16,8 @@ impl App for MyApp {
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
         // Use default setting except position and posture
         let camera = Camera::perspective_camera(
-            // specify position and posture
-            Matrix4::look_at(
-                // camera position
-                Point3::new(5.0, 6.0, 5.0),
-                // The camera looks to the center of the model.
-                Point3::new(0.0, 1.5, 0.0),
-                // the y-up coordinate
-                Vector3::unit_y(),
-            )
-            // The matrix output from `look_at` needs to be inverted,
-            // since cgmath uses the "self-centric" theory of moving the world with respect to the camera,
-            // while truck uses the "world-centric" theory of moving the camera with respect to the world.
-            .invert()
-            .unwrap(),
+            // We will update it later, so we leave it as a unit matrix here.
+            Matrix4::identity(),
             // the field of view. Default is Rad(PI / 4.0).
             Rad(PI / 4.5),
             // the distance to the near clipping plane
