@@ -18,7 +18,7 @@ impl App for MyApp {
         let camera = Camera::perspective_camera(
             // We will update it later, so we leave it as a unit matrix here.
             Matrix4::identity(),
-            // the field of view. Default is Rad(PI / 4.0).
+            // the field of view. Default is Rad(PI / 4.0). This case, a little telescope.
             Rad(PI / 4.5),
             // the distance to the near clipping plane
             0.1,
@@ -26,11 +26,12 @@ impl App for MyApp {
             10.0,
         );
 
-        // Useful constants for lights placement.
+        // radius of circumscribed circle
         let radius = 5.0 * f64::sqrt(2.0);
+        // Useful constants for lights placement.
         let omega = [0.5, f64::sqrt(3.0) * 0.5];
 
-        // positions of lights
+        // positions of lights, the vertices of regular triangle
         let position0 = Point3::new(radius * omega[0], 6.0, radius * omega[1]);
         let position1 = Point3::new(-radius, 6.0, 0.0);
         let position2 = Point3::new(radius * omega[0], 6.0, -radius * omega[1]);
@@ -65,7 +66,7 @@ impl App for MyApp {
             light_type: LightType::Point,
         };
 
-        // lights
+        // the vector of lights
         let lights = vec![red_light, green_light, blue_light];
 
         // Create the scene
