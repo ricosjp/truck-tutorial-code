@@ -148,16 +148,16 @@ fn torus() -> Shell {
 
 fn cylinder() -> Solid {
     // put a vertex
-    let vertex: Vertex = builder::vertex(Point3::new(-1.0, 0.0, 0.0));
+    let vertex: Vertex = builder::vertex(Point3::new(0.0, 0.0, -1.0));
     // sweep along circle
     let wire: Wire = builder::rsweep(
         &vertex,
-        Point3::new(-1.0, 1.0, 0.0),
-        Vector3::unit_x(),
+        Point3::new(0.0, 1.0, -1.0),
+        Vector3::unit_z(),
         Rad(7.0),
     );
     let face: Face = builder::try_attach_plane(&vec![wire]).expect("cannot attach plane");
-    builder::tsweep(&face, 2.0 * Vector3::unit_x())
+    builder::tsweep(&face, 2.0 * Vector3::unit_z())
 }
 
 // Run!
