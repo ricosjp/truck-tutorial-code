@@ -119,45 +119,76 @@ impl App for MyApp {
 
 const NUM_OF_SHAPES: usize = 3;
 
-// modeling cube
+// modeling a cube
 fn cube() -> Solid {
-    // put a vertex
+    // put a vertex at the point (-1, 0, -1)
     let vertex: Vertex = builder::vertex(Point3::new(-1.0, 0.0, -1.0));
-    // sweep along the x-unit vector
-    let edge: Edge = builder::tsweep(&vertex, 2.0 * Vector3::unit_z());
-    // sweep along the y-unit vector
-    let face: Face = builder::tsweep(&edge, 2.0 * Vector3::unit_x());
-    // sweep along the z-unit vector
-    builder::tsweep(&face, 2.0 * Vector3::unit_y())
+    // sweep the vertex along the z-axis
+    let edge: Edge = builder::tsweep(
+        // the reference of the vertex
+        &vertex,
+        // sweep along the z-axis
+        2.0 * Vector3::unit_z()
+    );
+    // sweep the edge along the x-axis
+    let face: Face = builder::tsweep(
+        // the reference of the edge
+        &edge,
+        // sweep along the x-axis
+        2.0 * Vector3::unit_x()
+    );
+    // sweep the face along the y-axis
+    builder::tsweep(
+        // the reference 0f the face
+        &face,
+        // sweep along the y-axis
+        2.0 * Vector3::unit_y()
+    )
 }
 
-// modeling torus
+// modeling a torus
 fn torus() -> Shell {
-    // put a vertex
+    // put a vertex at the point (0, 0, 1).
     let vertex: Vertex = builder::vertex(Point3::new(0.0, 0.0, 1.0));
-    // sweep along circle
+    // sweep the vertex along circle
     let wire: Wire = builder::rsweep(
+        // the reference of vertex
         &vertex,
+        // the center of the rotation
         Point3::new(0.0, 0.5, 1.0),
+        // the axis of the rotation
         Vector3::unit_x(),
+        // If a value greater than 2π radian is specified, a closed shape will be generated.
         Rad(7.0),
     );
     // sweep along circle
     builder::rsweep(&wire, Point3::origin(), Vector3::unit_y(), Rad(7.0))
 }
 
+// modeling a cylinder
 fn cylinder() -> Solid {
-    // put a vertex
+    // put a vertex at the point (0, 0, -1).
     let vertex: Vertex = builder::vertex(Point3::new(0.0, 0.0, -1.0));
-    // sweep along circle
+    // sweep the vertex along circle
     let wire: Wire = builder::rsweep(
+        // the reference of the vertex
         &vertex,
+        // the center of the rotation
         Point3::new(0.0, 1.0, -1.0),
+        // the axis of the rotation
         Vector3::unit_z(),
+        // If a value greater than 2π radian is specified, a closed shape will be generated.
         Rad(7.0),
     );
+    // make a disk by attaching a plane to the circle
     let face: Face = builder::try_attach_plane(&vec![wire]).expect("cannot attach plane");
-    builder::tsweep(&face, 2.0 * Vector3::unit_z())
+    // sweep the face along the z-axis
+    builder::tsweep(
+        // the reference of the disk
+        &face,
+        // sweep along the z-axis
+        2.0 * Vector3::unit_z()
+    )
 }
 
 // Run!
