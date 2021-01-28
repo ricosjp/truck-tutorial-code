@@ -127,21 +127,21 @@ fn cube() -> Solid {
     let edge: Edge = builder::tsweep(
         // the reference of the vertex
         &vertex,
-        // sweep along the z-axis
+        // sweep along the z-axis for length 2
         2.0 * Vector3::unit_z()
     );
     // sweep the edge along the x-axis
     let face: Face = builder::tsweep(
         // the reference of the edge
         &edge,
-        // sweep along the x-axis
+        // sweep along the x-axis for length 2
         2.0 * Vector3::unit_x()
     );
     // sweep the face along the y-axis
     builder::tsweep(
         // the reference 0f the face
         &face,
-        // sweep along the y-axis
+        // sweep along the y-axis for length 2
         2.0 * Vector3::unit_y()
     )
 }
@@ -150,19 +150,28 @@ fn cube() -> Solid {
 fn torus() -> Shell {
     // put a vertex at the point (0, 0, 1).
     let vertex: Vertex = builder::vertex(Point3::new(0.0, 0.0, 1.0));
-    // sweep the vertex along circle
-    let wire: Wire = builder::rsweep(
+    // sweep the vertex along a circle
+    let circle: Wire = builder::rsweep(
         // the reference of vertex
         &vertex,
         // the center of the rotation
         Point3::new(0.0, 0.5, 1.0),
         // the axis of the rotation
         Vector3::unit_x(),
-        // If a value greater than 2π radian is specified, a closed shape will be generated.
+        // If the specified value is greater than 2π radian, a closed shape will be generated.
         Rad(7.0),
     );
-    // sweep along circle
-    builder::rsweep(&wire, Point3::origin(), Vector3::unit_y(), Rad(7.0))
+    // sweep the circle along a circle
+    builder::rsweep(
+        // the reference of wire
+        &circle,
+        // the center of the rotation
+        Point3::origin(),
+        // the axis of the rotation
+        Vector3::unit_y(),
+        // If a value greater than 2π radian is specified, a closed shape will be generated.
+        Rad(7.0)
+    )
 }
 
 // modeling a cylinder
