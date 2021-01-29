@@ -5,12 +5,17 @@ use truck_platform::*;
 use truck_rendimpl::*;
 use wgpu::{AdapterInfo, SwapChainFrame};
 
-// Declare the application handler, a struct with a scene
+// Declare the application handler
 struct MyApp {
+    // scene
     scene: Scene,
+    // current drawn shape
     current_shape: i32,
+    // the drawn instance of cube
     cube: ShapeInstance,
+    // the drawn instance of torus
     torus: ShapeInstance,
+    // the drawn instance of cylinder
     cylinder: ShapeInstance,
 }
 
@@ -27,16 +32,19 @@ impl App for MyApp {
         let lights = vec![
             Light {
                 position: Point3::new(radius * omega[0], 6.0, radius * omega[1]),
+                // The color vector should be divided by 3.0. If not, the white will be satiated.
                 color: Vector3::new(1.0, 1.0, 1.0) / 3.0,
                 ..Default::default()
             },
             Light {
                 position: Point3::new(-radius, 5.0, 0.0),
+                // The color vector should be divided by 3.0. If not, the white will be satiated.
                 color: Vector3::new(1.0, 1.0, 1.0) / 3.0,
                 ..Default::default()
             },
             Light {
                 position: Point3::new(radius * omega[0], 4.0, -radius * omega[1]),
+                // The color vector should be divided by 3.0. If not, the white will be satiated.
                 color: Vector3::new(1.0, 1.0, 1.0) / 3.0,
                 ..Default::default()
             },
@@ -44,16 +52,11 @@ impl App for MyApp {
 
         // Create the scene
         let scene = Scene::new(
-            // `DeviceHandler` is the toolchain of the structs provided from wgpu.
-            // This allows the Scene to pass the information it receives from the CPU to the GPU.
             device_handler.clone(),
-            // This passes only a reference. In fact, it would be better to pass the entity,
-            // but we are trying to match the operability to wgpu.
             &SceneDescriptor {
+                // use the default camera
                 camera: Default::default(),
-                // A scene can have several lights.
                 lights,
-                // There are the other options. Look later!
                 ..Default::default()
             },
         );
@@ -94,7 +97,7 @@ impl App for MyApp {
             .unwrap();
 
         // the discretized number of lap
-        let laps = (time / (2.0 * PI)) as i32 % NUM_OF_SHAPES as i32;
+        let laps = (time / (2.0 * PI)) as i32 % 3;
 
         // the timing for changing the drawn shape
         if laps != self.current_shape {
@@ -116,8 +119,6 @@ impl App for MyApp {
         self.scene.render_scene(&frame.output.view)
     }
 }
-
-const NUM_OF_SHAPES: usize = 3;
 
 // modeling a cube
 fn cube() -> Solid {
