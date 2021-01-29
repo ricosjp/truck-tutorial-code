@@ -96,7 +96,7 @@ impl App for MyApp {
             .invert()
             .unwrap();
 
-        // the discretized number of lap
+        // the number of the shape which should be drawn
         let laps = (time / (2.0 * PI)) as i32 % 3;
 
         // the timing for changing the drawn shape
@@ -105,7 +105,7 @@ impl App for MyApp {
             self.current_shape = laps;
             // clear all objects in the scene
             self.scene.clear_objects();
-            // laps == 0 => cube, laps == 1 => torus
+            // laps == 0 => cube, laps == 1 => torus, laps == 2 => cylinder
             match laps {
                 0 => self.scene.add_objects(&self.cube.render_faces()),
                 1 => self.scene.add_objects(&self.torus.render_faces()),
