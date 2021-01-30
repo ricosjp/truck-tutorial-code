@@ -8,9 +8,12 @@ use wgpu::*;
 // size of the square
 const SQUARE_SIZE: usize = 5;
 // color of back ground
-const BACKGROUND: [f64; 4] = [45.0 / 255.0, 36.0 / 255.0, 42.0 / 255.0, 1.0];
-// color of boxes
-const BOXCOLOR: [f64; 4] = [208.0 / 255.0, 176.0 / 255.0, 107.0 / 255.0, 1.0];
+const BACK_GROUND: [f64; 4] = [45.0 / 255.0, 36.0 / 255.0, 42.0 / 255.0, 1.0];
+// color of cubes
+const CUBE_COLOR: [f64; 4] = [208.0 / 255.0, 176.0 / 255.0, 107.0 / 255.0, 1.0];
+
+// side length of boxes square
+const SIDE_LENGTH: f64 = (SQUARE_SIZE + 1) as f64 * 1.5;
 
 // application handler
 struct MyApp {
@@ -18,19 +21,15 @@ struct MyApp {
     scene: Scene,
     // instances for render
     instances: Vec<ShapeInstance>,
-    // initial matricies of instances
-    matrices: Vec<Matrix4>,
 }
 
 impl App for MyApp {
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> MyApp {
-        // side length of rendered square
-        let side_length = (SQUARE_SIZE + 1) as f64 * 1.5;
         // disntace between camera and rendered square
-        let camera_dist = side_length / 2.0 / (PI / 8.0).tan();
+        let camera_dist = SIDE_LENGTH / 2.0 / (PI / 8.0).tan();
 
         // temporary constants for light positions
-        let a = side_length / 2.0;
+        let a = SIDE_LENGTH / 2.0;
         let b = camera_dist / 2.0;
         let scene_desc = SceneDescriptor {
             camera: Camera::perspective_camera(
@@ -63,10 +62,10 @@ impl App for MyApp {
             ],
             // back ground color
             background: Color {
-                r: BACKGROUND[0],
-                g: BACKGROUND[1],
-                b: BACKGROUND[2],
-                a: BACKGROUND[3],
+                r: BACK_GROUND[0],
+                g: BACK_GROUND[1],
+                b: BACK_GROUND[2],
+                a: BACK_GROUND[3],
             },
             ..Default::default()
         };
@@ -85,27 +84,16 @@ impl App for MyApp {
 
         // vector for instances
         let mut instances = Vec::new();
-        // initialize matrices and instances
-        let mut matrices = Vec::new();
 
         // loop
         for i in 0..SQUARE_SIZE {
             for j in 0..SQUARE_SIZE {
-                // create an initial matrix
-                let matrix = Matrix4::from_translation(Vector3::new(
-                    1.5 * (i + 1) as f64 - side_length / 2.0,
-                    1.5 * (j + 1) as f64 - side_length / 2.0,
-                    0.0,
-                ));
-                // push matrix into the vector
-                matrices.push(matrix);
-
                 // create instance for drawing
                 let mut instance = original_instance.clone();
                 // set material
                 *instance.descriptor_mut() = InstanceDescriptor {
                     material: Material {
-                        albedo: Vector4::from(BOXCOLOR),
+                        albedo: Vector4::from(CUBE_COLOR),
                         reflectance: i as f64 / (SQUARE_SIZE - 1) as f64,
                         roughness: j as f64 / (SQUARE_SIZE - 1) as f64,
                         ambient_ratio: 0.02,
@@ -123,16 +111,26 @@ impl App for MyApp {
         MyApp {
             scene,
             instances,
-            matrices,
         }
     }
     fn update(&mut self, _: &DeviceHandler) {
         // the seconds since the application started.
         let time = self.scene.elapsed().as_secs_f64();
 
-        for (i, instance) in self.instances.iter_mut().enumerate() {
+        for (idx, instance) in self.instances.iter_mut().enumerate() {
+            // decompose the index of cube
+            let i = idx / SQUARE_SIZE;
+            let j = idx % SQUARE_SIZE;
+            
+            // create an initial matrix
+            let matrix = Matrix4::from_translation(Vector3::new(
+                1.5 * (i + 1) as f64 - SIDE_LENGTH / 2.0,
+                1.5 * (j + 1) as f64 - SIDE_LENGTH / 2.0,
+                0.0,
+            ));
+            
             // the axis of the rotation
-            let axis = if i % 2 == 0 {
+            let axis = if idx % 2 == 0 {
                 (-1.0_f64).powi(i as i32 / 2) * Vector3::unit_y()
             } else {
                 -(-1.0_f64).powi(i as i32 / 2) * Vector3::unit_x()
@@ -140,7 +138,7 @@ impl App for MyApp {
 
             // rotate the instances
             instance.descriptor_mut().matrix =
-                self.matrices[i] * Matrix4::from_axis_angle(axis, Rad(time * PI / 2.0));
+                matrix * Matrix4::from_axis_angle(axis, Rad(time * PI / 2.0));
 
             // update the scene
             self.scene.update_bind_groups(&instance.render_faces());
