@@ -91,14 +91,11 @@ impl App for MyApp {
                 // create instance for drawing
                 let mut instance = original_instance.clone();
                 // set material
-                *instance.descriptor_mut() = InstanceDescriptor {
-                    material: Material {
-                        albedo: Vector4::from(CUBE_COLOR),
-                        reflectance: i as f64 / (SQUARE_SIZE - 1) as f64,
-                        roughness: j as f64 / (SQUARE_SIZE - 1) as f64,
-                        ambient_ratio: 0.02,
-                    },
-                    ..Default::default()
+                instance.descriptor_mut().material = Material {
+                    albedo: Vector4::from(CUBE_COLOR),
+                    reflectance: i as f64 / (SQUARE_SIZE - 1) as f64,
+                    roughness: j as f64 / (SQUARE_SIZE - 1) as f64,
+                    ambient_ratio: 0.02,
                 };
                 // sign up the object to the scene
                 scene.add_objects(&instance.render_faces());
@@ -106,13 +103,10 @@ impl App for MyApp {
                 instances.push(instance);
             }
         }
-        
         // Returns the initialized application handler
-        MyApp {
-            scene,
-            instances,
-        }
+        MyApp { scene, instances }
     }
+
     fn update(&mut self, _: &DeviceHandler) {
         // the seconds since the application started.
         let time = self.scene.elapsed().as_secs_f64();
@@ -121,14 +115,12 @@ impl App for MyApp {
             // decompose the index of cube
             let i = idx / SQUARE_SIZE;
             let j = idx % SQUARE_SIZE;
-            
             // create an initial matrix
             let matrix = Matrix4::from_translation(Vector3::new(
                 1.5 * (i + 1) as f64 - SIDE_LENGTH / 2.0,
                 1.5 * (j + 1) as f64 - SIDE_LENGTH / 2.0,
                 0.0,
             ));
-            
             // the axis of the rotation
             let axis = if idx % 2 == 0 {
                 (-1.0_f64).powi(idx as i32 / 2) * Vector3::unit_y()
