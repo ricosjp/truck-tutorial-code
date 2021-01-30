@@ -115,9 +115,7 @@ impl App for MyApp {
     }
 
     // This method is called every frame.
-    fn render(&mut self, frame: &SwapChainFrame) {
-        self.scene.render_scene(&frame.output.view)
-    }
+    fn render(&mut self, frame: &SwapChainFrame) { self.scene.render_scene(&frame.output.view) }
 }
 
 // modeling a cube
@@ -129,21 +127,21 @@ fn cube() -> Solid {
         // the reference of the vertex
         &vertex,
         // sweep along the z-axis for length 2
-        2.0 * Vector3::unit_z()
+        2.0 * Vector3::unit_z(),
     );
     // sweep the edge along the x-axis
     let face: Face = builder::tsweep(
         // the reference of the edge
         &edge,
         // sweep along the x-axis for length 2
-        2.0 * Vector3::unit_x()
+        2.0 * Vector3::unit_x(),
     );
     // sweep the face along the y-axis
     builder::tsweep(
         // the reference 0f the face
         &face,
         // sweep along the y-axis for length 2
-        2.0 * Vector3::unit_y()
+        2.0 * Vector3::unit_y(),
     )
 }
 
@@ -171,7 +169,7 @@ fn torus() -> Shell {
         // the axis of the rotation
         Vector3::unit_y(),
         // If a value greater than 2π radian is specified, a closed shape will be generated.
-        Rad(7.0)
+        Rad(7.0),
     )
 }
 
@@ -197,11 +195,9 @@ fn cylinder() -> Solid {
         // the reference of the disk
         &face,
         // sweep along the z-axis
-        2.0 * Vector3::unit_z()
+        2.0 * Vector3::unit_z(),
     )
 }
 
 // Run!
-fn main() {
-    MyApp::run()
-}
+fn main() { MyApp::run() }
