@@ -12,7 +12,7 @@ const BACK_GROUND: [f64; 4] = [45.0 / 255.0, 36.0 / 255.0, 42.0 / 255.0, 1.0];
 // color of cubes
 const CUBE_COLOR: [f64; 4] = [208.0 / 255.0, 176.0 / 255.0, 107.0 / 255.0, 1.0];
 
-// side length of boxes square
+// side length of cubes square
 const SIDE_LENGTH: f64 = (SQUARE_SIZE + 1) as f64 * 1.5;
 
 // application handler
