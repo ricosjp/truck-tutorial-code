@@ -131,9 +131,9 @@ impl App for MyApp {
             
             // the axis of the rotation
             let axis = if idx % 2 == 0 {
-                (-1.0_f64).powi(i as i32 / 2) * Vector3::unit_y()
+                (-1.0_f64).powi(idx as i32 / 2) * Vector3::unit_y()
             } else {
-                -(-1.0_f64).powi(i as i32 / 2) * Vector3::unit_x()
+                -(-1.0_f64).powi(idx as i32 / 2) * Vector3::unit_x()
             };
 
             // rotate the instances
