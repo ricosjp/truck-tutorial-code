@@ -10,7 +10,7 @@ edition = "2018"
 winit = "0.24.0" # low-level crate for handling GUI systems
 futures = "0.3.8" # Abstractions for asynchronous programming. Necessary for communicate with GPU.
 truck-platform = "0.1.0" # graphic utility library based on wgpu
-truck-rendimpl = "0.1.2" # Visualization of shape and polygon mesh based on truck-platform
+truck-rendimpl = "0.1.3" # Visualization of shape and polygon mesh based on truck-platform
 
 [[bin]]
 name = "section2_1"
@@ -31,3 +31,7 @@ path = "src/section2_4.rs"
 [[bin]]
 name = "section2_5"
 path = "src/section2_5.rs"
+
+[[bin]]
+name = "section2_6"
+path = "src/section2_6.rs"
