@@ -80,41 +80,55 @@ impl App for MyApp {
             }
             _ => {}
         }
+        // Return a command to wait 1/60 second.
         Self::default_control_flow()
     }
     fn cursor_moved(&mut self, position: PhysicalPosition<f64>) -> ControlFlow {
         let position = Vector2::new(position.x, position.y);
         if self.rotate_flag {
+            // get the mutable references of camera and light
             let desc = self.scene.descriptor_mut();
             let (camera, light) = (&mut desc.camera, &mut desc.lights[0]);
+            // get the delta of cursor move
             let dir2d = position - self.prev_cursor;
+            // Do nothing if the delta is so small.
             if dir2d.so_small() {
                 return Self::default_control_flow();
             }
-            let mut axis = dir2d[1] * camera.matrix[0].truncate();
-            axis += dir2d[0] * &camera.matrix[1].truncate();
-            axis /= axis.magnitude();
+            // axis of rotation
+            let axis = (dir2d[1] * camera.matrix[0].truncate()
+                + dir2d[0] * camera.matrix[1].truncate())
+            .normalize();
+            // angle of rotation
             let angle = dir2d.magnitude() * 0.01;
-            let mat = Matrix4::from_axis_angle(axis, Rad(angle));
-            camera.matrix = mat.invert().unwrap() * camera.matrix;
+            // rotation matrix. The rotation angle is minus, as the camera is moved.
+            let mat = Matrix4::from_axis_angle(axis, Rad(-angle));
+            // move the camera and light.
+            camera.matrix = mat * camera.matrix;
             light.position = camera.position();
         }
+        // assign the current cursor position to "previous cursor position"
         self.prev_cursor = position;
+        // Return a command to wait 1/60 second.
         Self::default_control_flow()
     }
     /// Processing when the mouse wheel is moved.
     fn mouse_wheel(&mut self, delta: MouseScrollDelta, _: TouchPhase) -> ControlFlow {
         match delta {
+            // use only y-delta
             MouseScrollDelta::LineDelta(_, y) => {
+                // get the mutable references of camera and light
                 let sc_desc = self.scene.descriptor_mut();
-                let camera = &mut sc_desc.camera;
-                let light_position = &mut sc_desc.lights[0].position;
-                let trans_vec = camera.eye_direction() * 0.2 * y as f64;
-                camera.matrix = Matrix4::from_translation(trans_vec) * camera.matrix;
-                *light_position = camera.matrix[3].to_point();
+                let (camera, light) = (&mut sc_desc.camera, &mut sc_desc.lights[0]);
+                // Translation to the eye direction by 0.2 times the value obtained from the wheel.
+                let trans = Matrix4::from_translation(camera.eye_direction() * 0.2 * y as f64);
+                // move the camera and light
+                camera.matrix = trans * camera.matrix;
+                light.position = camera.position();
             }
-            MouseScrollDelta::PixelDelta(_) => {}
+            _ => {}
         };
+        // Return a command to wait 1/60 second.
         Self::default_control_flow()
     }
 
