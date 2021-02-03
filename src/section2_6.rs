@@ -6,10 +6,13 @@ use truck_rendimpl::*;
 use wgpu::{AdapterInfo, SwapChainFrame};
 use winit::{dpi::*, event::*, event_loop::ControlFlow};
 
-// Declare the application handler, a struct with a scene
+// the application handler
 struct MyApp {
+    // scene
     scene: Scene,
+    // dragging flag
     rotate_flag: bool,
+    // position of the cursor at the previous frame. None if not dragging.
     prev_cursor: Option<Vector2>,
 }
 
@@ -17,7 +20,6 @@ struct MyApp {
 impl App for MyApp {
     // constructor
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
-        // Create the scene
         let mut scene = Scene::new(
             device_handler.clone(),
             &SceneDescriptor {
@@ -33,46 +35,47 @@ impl App for MyApp {
                     0.1,
                     40.0,
                 ),
-                lights: vec![
-                    Light {
-                        position: Point3::new(1.5, 1.5, 1.5),
-                        color: Vector3::new(1.0, 1.0, 1.0),
-                        light_type: LightType::Point,
-                    },
-                    /*Light {
-                        position: Point3::origin(),
-                        color: Vector3::new(0.25, 0.25, 0.25),
-                        light_type: LightType::Point,
-                    },*/
-                ],
-                // There are the other options. Look later!
+                lights: vec![Light {
+                    position: Point3::new(1.5, 1.5, 1.5),
+                    color: Vector3::new(1.0, 1.0, 1.0),
+                    light_type: LightType::Point,
+                }],
                 ..Default::default()
             },
         );
 
+        // modeling the bottle and signup to the scene
         let bottle = bottle(1.4, 1.0, 0.6);
-        let instance = scene.create_instance(&bottle, &InstanceDescriptor {
-            material: Material {
-                albedo: Vector4::new(0.75, 0.75, 0.75, 1.0),
-                reflectance: 0.2,
-                roughness: 0.2,
-                ambient_ratio: 0.02,
+        let instance = scene.create_instance(
+            &bottle,
+            &InstanceDescriptor {
+                // smooth plastic texture
+                material: Material {
+                    albedo: Vector4::new(0.75, 0.75, 0.75, 1.0),
+                    reflectance: 0.2,
+                    roughness: 0.2,
+                    ambient_ratio: 0.02,
+                },
+                ..Default::default()
             },
-            ..Default::default()
-        });
+        );
         scene.add_objects(&instance.render_faces());
 
         // Return the application handler
         MyApp {
             scene,
+            // The mouse is not dragged when the application starts.
             rotate_flag: false,
             prev_cursor: None,
         }
     }
 
+    // Called when the mouse button is pressed and released.
     fn mouse_input(&mut self, state: ElementState, button: MouseButton) -> ControlFlow {
         match button {
+            // Behavior when the left button is pressed or unpressed
             MouseButton::Left => {
+                // pressed => start dragging, unpressed => end dragging.
                 self.rotate_flag = state == ElementState::Pressed;
                 if !self.rotate_flag {
                     self.prev_cursor = None;
@@ -104,7 +107,7 @@ impl App for MyApp {
         }
         Self::default_control_flow()
     }
-        /// Processing when the mouse wheel is moved.
+    /// Processing when the mouse wheel is moved.
     fn mouse_wheel(&mut self, delta: MouseScrollDelta, _: TouchPhase) -> ControlFlow {
         match delta {
             MouseScrollDelta::LineDelta(_, y) => {
@@ -150,6 +153,7 @@ fn grue_body_neck(body: &mut Shell, neck: Shell) {
     body.extend(neck.into_iter().skip(1));
 }
 
+// modeling a bottle
 fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
     let mut body = body_shell(0.0, height, width, thickness);
     let neck = cylinder(height, height / 10.0, thickness / 4.0);
@@ -169,8 +173,11 @@ fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
     let wire = inner_hat.into_boundaries()[0].inverse();
     body.last_mut().unwrap().add_boundary(wire);
     body.extend(inner_body.into_iter().map(|face| face.inverse()));
-    
-    builder::translated(&Solid::new(vec![body]), Vector3::new(0.0, -height / 2.0, 0.0))
+
+    builder::translated(
+        &Solid::new(vec![body]),
+        Vector3::new(0.0, -height / 2.0, 0.0),
+    )
 }
 
 // Run!
