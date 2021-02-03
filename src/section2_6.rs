@@ -99,7 +99,7 @@ impl App for MyApp {
             let axis = (dir2d[1] * camera.matrix[0].truncate()
                 + dir2d[0] * camera.matrix[1].truncate())
             .normalize();
-            // angle of rotation
+            // angle of rotation. 0.01 times the pixel distance.
             let angle = dir2d.magnitude() * 0.01;
             // rotation matrix. The rotation angle is minus, as the camera is moved.
             let mat = Matrix4::from_axis_angle(axis, Rad(-angle));
