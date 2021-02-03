@@ -12,8 +12,8 @@ struct MyApp {
     scene: Scene,
     // dragging flag
     rotate_flag: bool,
-    // position of the cursor at the previous frame. None if not dragging.
-    prev_cursor: Option<Vector2>,
+    // position of the cursor at the previous frame.
+    prev_cursor: Vector2,
 }
 
 // Implement App to the empty struct
@@ -66,7 +66,7 @@ impl App for MyApp {
             scene,
             // The mouse is not dragged when the application starts.
             rotate_flag: false,
-            prev_cursor: None,
+            prev_cursor: Vector2::zero(),
         }
     }
 
@@ -77,34 +77,29 @@ impl App for MyApp {
             MouseButton::Left => {
                 // pressed => start dragging, unpressed => end dragging.
                 self.rotate_flag = state == ElementState::Pressed;
-                if !self.rotate_flag {
-                    self.prev_cursor = None;
-                }
             }
             _ => {}
         }
         Self::default_control_flow()
     }
     fn cursor_moved(&mut self, position: PhysicalPosition<f64>) -> ControlFlow {
+        let position = Vector2::new(position.x, position.y);
         if self.rotate_flag {
             let desc = self.scene.descriptor_mut();
             let (camera, light) = (&mut desc.camera, &mut desc.lights[0]);
-            let position = Vector2::new(position.x, position.y);
-            if let Some(ref prev_position) = self.prev_cursor {
-                let dir2d = &position - prev_position;
-                if dir2d.so_small() {
-                    return Self::default_control_flow();
-                }
-                let mut axis = dir2d[1] * camera.matrix[0].truncate();
-                axis += dir2d[0] * &camera.matrix[1].truncate();
-                axis /= axis.magnitude();
-                let angle = dir2d.magnitude() * 0.01;
-                let mat = Matrix4::from_axis_angle(axis, Rad(angle));
-                camera.matrix = mat.invert().unwrap() * camera.matrix;
-                light.position = camera.position();
+            let dir2d = position - self.prev_cursor;
+            if dir2d.so_small() {
+                return Self::default_control_flow();
             }
-            self.prev_cursor = Some(position);
+            let mut axis = dir2d[1] * camera.matrix[0].truncate();
+            axis += dir2d[0] * &camera.matrix[1].truncate();
+            axis /= axis.magnitude();
+            let angle = dir2d.magnitude() * 0.01;
+            let mat = Matrix4::from_axis_angle(axis, Rad(angle));
+            camera.matrix = mat.invert().unwrap() * camera.matrix;
+            light.position = camera.position();
         }
+        self.prev_cursor = position;
         Self::default_control_flow()
     }
     /// Processing when the mouse wheel is moved.
