@@ -161,7 +161,7 @@ fn grue_body_neck(body: &mut Shell, neck: Shell) {
     body_seiling.add_boundary(wire);
     body.extend(neck.into_iter().skip(1));
 }
-
+/*
 // modeling a bottle
 fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
     let mut body = body_shell(0.0, height, width, thickness);
@@ -187,6 +187,28 @@ fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
         &Solid::new(vec![body]),
         Vector3::new(0.0, -height / 2.0, 0.0),
     )
+}
+*/
+
+fn bottle(_height: f64, _width: f64, _thickness: f64) -> Shell {
+    // 立方体を作成する
+    let vertex: Vertex = builder::vertex(Point3::new(-0.5, -0.5, -0.5));
+    let edge: Edge = builder::tsweep(&vertex, Vector3::unit_z());
+    let face: Face = builder::tsweep(&edge, Vector3::unit_x());
+    let cube: Solid = builder::tsweep(&face, Vector3::unit_y());
+    
+    // 立方体をシェルにする
+    let mut shell: Shell = cube.into_boundaries().pop().unwrap();
+    // 底面に加える穴を開けるための境界を作る
+    let circle: Wire = builder::rsweep(
+        &builder::vertex(Point3::new(0.0, -0.5, 0.25)),
+        Point3::new(0.0, -0.5, 0.0),
+        Vector3::unit_y(),
+        Rad(7.0),
+    );
+    // 底面に境界を加えて穴をあける
+    shell[0].add_boundary(circle);
+    shell
 }
 
 // Run!
