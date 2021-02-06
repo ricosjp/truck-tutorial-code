@@ -9,7 +9,7 @@ struct MyApp {
     scene: Scene,
 }
 
-// Implement App to the empty struct
+// Make MyApp an application handler by implementing App
 impl App for MyApp {
     // constructor
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {

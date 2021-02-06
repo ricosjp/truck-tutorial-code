@@ -12,12 +12,12 @@ cargo run --bin section2_1
 
 ## system requirements
 
-The prerequisites for using truck are as follows:
+The prerequisites for truck are as follows:
 
 - Rust development environment must be in place.
 - Must run Vulkan, Metal, or DirectX12, the backend of wgpu.
 
-Currently, `cmake` is required to test. Honever, it is not necessary as long as you are using it as a pure package. The details for each OS are described below.
+Currently, `cmake` is required to test. Honever, it is not necessary as long as you are using it as a pure package. In the following, we describe the details for each OS.
 
 ### Windows
 
