@@ -53,7 +53,7 @@ impl App for MyApp {
         );
 
         // Load the polygon from a wavefront obj file.
-        let polygon = polymesh::obj::read(include_bytes!("teapot.obj").as_ref()).unwrap();        
+        let polygon = polymesh::obj::read(include_bytes!("teapot.obj").as_ref()).unwrap();
         // Once the polygon data is in the form of an "instance".
         // This may seem wasteful to the beginning user, but this redundancy is useful for saving memory.
         let instance = scene.create_instance(&polygon, &Default::default());
@@ -65,7 +65,10 @@ impl App for MyApp {
     }
 
     // This method is called every frame.
-    fn render(&mut self, frame: &SwapChainFrame) { self.scene.render_scene(&frame.output.view) }
+    fn render(&mut self, frame: &SwapChainFrame) {
+        // scene draws a picture to the window.
+        self.scene.render_scene(&frame.output.view);
+    }
 }
 
 // Run!

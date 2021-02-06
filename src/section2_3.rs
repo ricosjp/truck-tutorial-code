@@ -23,7 +23,7 @@ impl App for MyApp {
             // the distance to the near clipping plane
             0.1,
             // the distance to the far clipping plane
-            10.0,
+            20.0,
         );
 
         // radius of circumscribed circle
@@ -38,7 +38,7 @@ impl App for MyApp {
 
         // red light
         let red_light = Light {
-            // the position of red light
+            // position of the red light
             position: position0,
             // red
             color: Vector3::new(1.0, 0.0, 0.0),
@@ -48,7 +48,7 @@ impl App for MyApp {
 
         // green light
         let green_light = Light {
-            // the position of green light
+            // position of the green light
             position: position1,
             // green
             color: Vector3::new(0.0, 1.0, 0.0),
@@ -58,7 +58,7 @@ impl App for MyApp {
 
         // blue light
         let blue_light = Light {
-            // the position of the third light
+            // position of the blue light
             position: position2,
             // blue
             color: Vector3::new(0.0, 0.0, 1.0),
@@ -103,11 +103,11 @@ impl App for MyApp {
         // the seconds since the application started.
         let time = self.scene.elapsed().as_secs_f64();
 
-        // the mutable references of camera and lights.
+        // the mutable references to camera and lights.
         let (camera, lights) = {
             // Reget the mutable reference of SceneDescriptor.
             let desc = self.scene.descriptor_mut();
-            // the mutable references of camera and lights.
+            // the mutable references to camera and lights.
             (&mut desc.camera, &mut desc.lights)
         };
 
