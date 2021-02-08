@@ -70,12 +70,32 @@ impl App for MyApp {
         }
     }
 
+    /// Processing when the mouse wheel is moved.
+    fn mouse_wheel(&mut self, delta: MouseScrollDelta, _: TouchPhase) -> ControlFlow {
+        match delta {
+            // use only y-delta
+            MouseScrollDelta::LineDelta(_, y) => {
+                // get the mutable references to camera and light
+                let sc_desc = self.scene.descriptor_mut();
+                let (camera, light) = (&mut sc_desc.camera, &mut sc_desc.lights[0]);
+                // Translation to the eye direction by 0.2 times the value obtained from the wheel.
+                let trans = Matrix4::from_translation(camera.eye_direction() * 0.2 * y as f64);
+                // move the camera and light
+                camera.matrix = trans * camera.matrix;
+                light.position = camera.position();
+            }
+            _ => {}
+        };
+        // Return a command to wait 1/60 second.
+        Self::default_control_flow()
+    }
+
     // Called when the mouse button is pressed and released.
     fn mouse_input(&mut self, state: ElementState, button: MouseButton) -> ControlFlow {
         match button {
             // Behavior when the left button is pressed or unpressed
             MouseButton::Left => {
-                // pressed => start dragging, unpressed => end dragging.
+                // pressed => start dragging, released => end dragging.
                 self.rotate_flag = state == ElementState::Pressed;
             }
             _ => {}
@@ -83,6 +103,8 @@ impl App for MyApp {
         // Return a command to wait 1/60 second.
         Self::default_control_flow()
     }
+
+    // Called when the cursor is moved
     fn cursor_moved(&mut self, position: PhysicalPosition<f64>) -> ControlFlow {
         let position = Vector2::new(position.x, position.y);
         if self.rotate_flag {
@@ -109,25 +131,6 @@ impl App for MyApp {
         }
         // assign the current cursor position to "previous cursor position"
         self.prev_cursor = position;
-        // Return a command to wait 1/60 second.
-        Self::default_control_flow()
-    }
-    /// Processing when the mouse wheel is moved.
-    fn mouse_wheel(&mut self, delta: MouseScrollDelta, _: TouchPhase) -> ControlFlow {
-        match delta {
-            // use only y-delta
-            MouseScrollDelta::LineDelta(_, y) => {
-                // get the mutable references of camera and light
-                let sc_desc = self.scene.descriptor_mut();
-                let (camera, light) = (&mut sc_desc.camera, &mut sc_desc.lights[0]);
-                // Translation to the eye direction by 0.2 times the value obtained from the wheel.
-                let trans = Matrix4::from_translation(camera.eye_direction() * 0.2 * y as f64);
-                // move the camera and light
-                camera.matrix = trans * camera.matrix;
-                light.position = camera.position();
-            }
-            _ => {}
-        };
         // Return a command to wait 1/60 second.
         Self::default_control_flow()
     }
@@ -174,13 +177,13 @@ fn cylinder(bottom: f64, height: f64, radius: f64) -> Shell {
 }
 
 // sew the body and the neck
-fn grue_body_neck(body: &mut Shell, neck: Shell) {
-    // get the body's seiling
-    let body_seiling = body.last_mut().unwrap();
+fn glue_body_neck(body: &mut Shell, neck: Shell) {
+    // get the body's ceiling
+    let body_ceiling = body.last_mut().unwrap();
     // the boundary of the neck's bottom
     let wire = neck[0].boundaries()[0].clone();
     // drill a hole in the body using the boundary of the neck's bottom
-    body_seiling.add_boundary(wire);
+    body_ceiling.add_boundary(wire);
     // add the faces of the neck to the body other than the bottom
     body.extend(neck.into_iter().skip(1));
 }
@@ -192,7 +195,7 @@ fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
     // create the neck of the bottle
     let neck = cylinder(height / 2.0, height / 10.0, thickness / 4.0);
     // sew the body and the neck
-    grue_body_neck(&mut body, neck);
+    glue_body_neck(&mut body, neck);
 
     // distance between outer and inner surface, i.e. the thickness of the faces.
     let eps = height / 50.0;
@@ -210,20 +213,20 @@ fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
         thickness / 4.0 - eps,
     );
     // sew the inner body and the inner neck
-    grue_body_neck(&mut inner_body, inner_neck);
+    glue_body_neck(&mut inner_body, inner_neck);
 
     // invert all faces of the inner body
     inner_body.face_iter_mut().for_each(|face| {
         face.invert();
     });
-    // pop the seiling of the inner body
-    let inner_seiling = inner_body.pop().unwrap();
-    // make the inner seiling the boundary wire
-    let wire = inner_seiling.into_boundaries().pop().unwrap();
-    // the mutable reference of the outer seiling
-    let seiling = body.last_mut().unwrap();
-    // drill a hole in the outer seiling using the boundary of inner seiling
-    seiling.add_boundary(wire);
+    // pop the ceiling of the inner body
+    let inner_ceiling = inner_body.pop().unwrap();
+    // make the inner ceiling the boundary wire
+    let wire = inner_ceiling.into_boundaries().pop().unwrap();
+    // the mutable reference of the outer ceiling
+    let ceiling = body.last_mut().unwrap();
+    // drill a hole in the outer ceiling using the boundary of inner ceiling
+    ceiling.add_boundary(wire);
     // add the faces of the neck to the body
     body.extend(inner_body.into_iter());
     // returns the solid
