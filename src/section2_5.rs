@@ -83,13 +83,13 @@ impl App for MyApp {
         let original_instance = scene.create_instance(&cube, &Default::default());
 
         // vector for instances
-        let mut instances = Vec::new();
+        let mut instances = Vec::with_capacity(SQUARE_SIZE * SQUARE_SIZE);
 
         // loop
         for i in 0..SQUARE_SIZE {
             for j in 0..SQUARE_SIZE {
                 // create instance for drawing
-                let mut instance = original_instance.clone();
+                let mut instance = original_instance.clone_instance();
                 // set material
                 instance.descriptor_mut().material = Material {
                     albedo: Vector4::from(CUBE_COLOR),
@@ -112,8 +112,9 @@ impl App for MyApp {
         let time = self.scene.elapsed().as_secs_f64();
 
         for (idx, instance) in self.instances.iter_mut().enumerate() {
-            // decompose the index of cube
+            // row index
             let i = idx / SQUARE_SIZE;
+            // column index
             let j = idx % SQUARE_SIZE;
             // create an initial matrix
             let matrix = Matrix4::from_translation(Vector3::new(
@@ -121,7 +122,7 @@ impl App for MyApp {
                 1.5 * (j + 1) as f64 - SIDE_LENGTH / 2.0,
                 0.0,
             ));
-            // the axis of the rotation
+            // the axes of the rotation
             let axis = if idx % 2 == 0 {
                 (-1.0_f64).powi(idx as i32 / 2) * Vector3::unit_y()
             } else {
