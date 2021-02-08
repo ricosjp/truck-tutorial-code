@@ -11,11 +11,11 @@ struct MyApp {
     scene: Scene,
     // current drawn shape
     current_shape: i32,
-    // the drawn instance of cube
+    // the instance of cube
     cube: ShapeInstance,
-    // the drawn instance of torus
+    // the instance of torus
     torus: ShapeInstance,
-    // the drawn instance of cylinder
+    // the instance of cylinder
     cylinder: ShapeInstance,
 }
 
@@ -83,7 +83,7 @@ impl App for MyApp {
         // the seconds since the application started.
         let time = self.scene.elapsed().as_secs_f64();
 
-        // the mutable references of camera
+        // the mutable references to the camera
         let camera = &mut self.scene.descriptor_mut().camera;
 
         // update camera matrix
@@ -96,12 +96,12 @@ impl App for MyApp {
             .invert()
             .unwrap();
 
-        // the number of the shape which should be drawn
+        // the number of the shape which should be displayed
         let laps = (time / (2.0 * PI)) as i32 % 3;
 
         // the timing for changing the drawn shape
         if laps != self.current_shape {
-            // synchronize variable
+            // synchronize variables
             self.current_shape = laps;
             // clear all objects in the scene
             self.scene.clear_objects();
@@ -124,21 +124,21 @@ fn cube() -> Solid {
     let vertex: Vertex = builder::vertex(Point3::new(-1.0, 0.0, -1.0));
     // sweep the vertex along the z-axis
     let edge: Edge = builder::tsweep(
-        // the reference of the vertex
+        // the reference to the vertex
         &vertex,
         // sweep along the z-axis for length 2
         2.0 * Vector3::unit_z(),
     );
     // sweep the edge along the x-axis
     let face: Face = builder::tsweep(
-        // the reference of the edge
+        // the reference to the edge
         &edge,
         // sweep along the x-axis for length 2
         2.0 * Vector3::unit_x(),
     );
     // sweep the face along the y-axis
     builder::tsweep(
-        // the reference 0f the face
+        // the reference to the face
         &face,
         // sweep along the y-axis for length 2
         2.0 * Vector3::unit_y(),
@@ -151,24 +151,24 @@ fn torus() -> Shell {
     let vertex: Vertex = builder::vertex(Point3::new(0.0, 0.0, 1.0));
     // sweep the vertex along a circle
     let circle: Wire = builder::rsweep(
-        // the reference of vertex
+        // the reference to the vertex
         &vertex,
-        // the center of the rotation
+        // a point on the axis
         Point3::new(0.0, 0.5, 1.0),
-        // the axis of the rotation
+        // the direction of the axis
         Vector3::unit_x(),
-        // If the specified value is greater than 2π radian, a closed shape will be generated.
+        // If the absolute value is no less than 2π radian, a closed shape will be generated.
         Rad(7.0),
     );
     // sweep the circle along a circle
     builder::rsweep(
-        // the reference of wire
+        // the reference to the wire
         &circle,
-        // the center of the rotation
+        // a point on the axis
         Point3::origin(),
-        // the axis of the rotation
+        // the direction of the axis
         Vector3::unit_y(),
-        // If a value greater than 2π radian is specified, a closed shape will be generated.
+        // If the absolute value is no less than 2π radian, a closed shape will be generated.
         Rad(7.0),
     )
 }
@@ -181,9 +181,9 @@ fn cylinder() -> Solid {
     let wire: Wire = builder::rsweep(
         // the reference of the vertex
         &vertex,
-        // the center of the rotation
+        // a point on the axis
         Point3::new(0.0, 1.0, -1.0),
-        // the axis of the rotation
+        // the direction of the axis
         Vector3::unit_z(),
         // If a value greater than 2π radian is specified, a closed shape will be generated.
         Rad(7.0),
