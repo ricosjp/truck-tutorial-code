@@ -1,6 +1,6 @@
 # truck-tutorial-code
 
-This is a sample code for [truck-tutorial](https://ricos.gitlab.io/truck-tutorial/) or [truck-tutorial-ja](https://ricos.gitlab.io/truck-tutorial-ja/).
+This is a sample code for [truck-tutorial](https://ricos.gitlab.io/truck-tutorial/v0.1) or [truck-tutorial-ja](https://ricos.gitlab.io/truck-tutorial-ja/v0.1).
 
 ## Naming rule of executable code
 
