@@ -105,7 +105,7 @@ impl App for MyApp {
 
         // the mutable references to camera and lights.
         let (camera, lights) = {
-            // Reget the mutable reference of SceneDescriptor.
+            // Reget the mutable reference to SceneDescriptor.
             let desc = self.scene.descriptor_mut();
             // the mutable references to camera and lights.
             (&mut desc.camera, &mut desc.lights)

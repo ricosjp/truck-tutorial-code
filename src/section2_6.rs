@@ -223,7 +223,7 @@ fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
     let inner_ceiling = inner_body.pop().unwrap();
     // make the inner ceiling the boundary wire
     let wire = inner_ceiling.into_boundaries().pop().unwrap();
-    // the mutable reference of the outer ceiling
+    // the mutable reference to the outer ceiling
     let ceiling = body.last_mut().unwrap();
     // drill a hole in the outer ceiling using the boundary of inner ceiling
     ceiling.add_boundary(wire);

@@ -179,7 +179,7 @@ fn cylinder() -> Solid {
     let vertex: Vertex = builder::vertex(Point3::new(0.0, 0.0, -1.0));
     // sweep the vertex along circle
     let wire: Wire = builder::rsweep(
-        // the reference of the vertex
+        // the reference to the vertex
         &vertex,
         // a point on the axis
         Point3::new(0.0, 1.0, -1.0),
@@ -192,7 +192,7 @@ fn cylinder() -> Solid {
     let face: Face = builder::try_attach_plane(&vec![wire]).expect("cannot attach plane");
     // sweep the face along the z-axis
     builder::tsweep(
-        // the reference of the disk
+        // the reference to the disk
         &face,
         // sweep along the z-axis
         2.0 * Vector3::unit_z(),
