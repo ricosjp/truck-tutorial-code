@@ -10,6 +10,8 @@ Each excutable code corresponds each section. For example, one can write code eq
 cargo run --bin section2_1
 ```
 
+If you see a blank black window, then it is working.
+
 ## system requirements
 
 The prerequisites for truck are as follows:
