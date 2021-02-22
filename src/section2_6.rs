@@ -20,11 +20,11 @@ struct MyApp {
 impl App for MyApp {
     // constructor
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
-        let mut scene = Scene::new(
+        let mut scene: Scene = Scene::new(
             device_handler.clone(),
             &SceneDescriptor {
                 camera: Camera::perspective_camera(
-                    Matrix4::look_at(
+                    Matrix4::look_at_rh(
                         Point3::new(1.5, 1.5, 1.5),
                         Point3::origin(),
                         Vector3::unit_y(),
@@ -45,21 +45,24 @@ impl App for MyApp {
         );
 
         // modeling the bottle and signup to the scene
-        let bottle = bottle(1.4, 1.0, 0.6);
-        let instance = scene.create_instance(
+        let bottle: Solid = bottle(1.4, 1.0, 0.6);
+        let instance: ShapeInstance = scene.instance_creator().create_shape_instance(
             &bottle,
-            &InstanceDescriptor {
-                // smooth plastic texture
-                material: Material {
-                    albedo: Vector4::new(0.75, 0.75, 0.75, 1.0),
-                    reflectance: 0.2,
-                    roughness: 0.2,
-                    ambient_ratio: 0.02,
+            &ShapeInstanceDescriptor {
+                instance_state: InstanceState {
+                    // smooth plastic texture
+                    material: Material {
+                        albedo: Vector4::new(0.75, 0.75, 0.75, 1.0),
+                        reflectance: 0.2,
+                        roughness: 0.2,
+                        ambient_ratio: 0.02,
+                    },
+                    ..Default::default()
                 },
                 ..Default::default()
             },
         );
-        scene.add_objects(&instance.render_faces());
+        scene.add_object(&instance);
 
         // Return the application handler
         MyApp {
@@ -136,7 +139,9 @@ impl App for MyApp {
     }
 
     // This method is called every frame.
-    fn render(&mut self, frame: &SwapChainFrame) { self.scene.render_scene(&frame.output.view) }
+    fn render(&mut self, frame: &SwapChainFrame) {
+        self.scene.render_scene(&frame.output.view)
+    }
 }
 
 // modeling the body shape
@@ -234,4 +239,6 @@ fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
 }
 
 // Run!
-fn main() { MyApp::run() }
+fn main() {
+    MyApp::run()
+}

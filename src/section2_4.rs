@@ -3,6 +3,7 @@ use app::App; // Use the trait app::App
 use std::f64::consts::PI;
 use truck_platform::*;
 use truck_rendimpl::*;
+use topology::Vertex;
 use wgpu::{AdapterInfo, SwapChainFrame};
 
 // Declare the application handler
@@ -24,12 +25,12 @@ impl App for MyApp {
     // constructor
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
         // radius of circumscribed circle
-        let radius = 5.0 * f64::sqrt(2.0);
+        let radius: f64 = 5.0 * f64::sqrt(2.0);
         // Useful constants for lights placement.
-        let omega = [0.5, f64::sqrt(3.0) * 0.5];
+        let omega: [f64; 2] = [0.5, f64::sqrt(3.0) * 0.5];
 
         // the vector of lights
-        let lights = vec![
+        let lights: Vec<Light> = vec![
             Light {
                 position: Point3::new(radius * omega[0], 6.0, radius * omega[1]),
                 // The color vector should be divided by 3.0. If not, the white will be satiated.
@@ -51,7 +52,7 @@ impl App for MyApp {
         ];
 
         // Create the scene
-        let scene = Scene::new(
+        let scene: Scene = Scene::new(
             device_handler.clone(),
             &SceneDescriptor {
                 // use the default camera
@@ -61,12 +62,16 @@ impl App for MyApp {
             },
         );
 
+        // An instance is created by InstanceCreator.
+        // This structure prepares the data necessary for instance creation at initialization time,
+        // so using it around will improve performance.
+        let creator: InstanceCreator = scene.instance_creator();
         // create cube instance
-        let cube = scene.create_instance(&cube(), &Default::default());
+        let cube: ShapeInstance = creator.create_shape_instance(&cube(), &Default::default());
         // create torus instance
-        let torus = scene.create_instance(&torus(), &Default::default());
+        let torus: ShapeInstance = creator.create_shape_instance(&torus(), &Default::default());
         // create cylinder instance
-        let cylinder = scene.create_instance(&cylinder(), &Default::default());
+        let cylinder: ShapeInstance = creator.create_shape_instance(&cylinder(), &Default::default());
 
         // Return the application handler
         MyApp {
@@ -81,14 +86,14 @@ impl App for MyApp {
     // This meshod is called every frame
     fn update(&mut self, _handler: &DeviceHandler) {
         // the seconds since the application started.
-        let time = self.scene.elapsed().as_secs_f64();
+        let time: f64 = self.scene.elapsed().as_secs_f64();
 
         // the mutable references to the camera
-        let camera = &mut self.scene.descriptor_mut().camera;
+        let camera: &mut Camera = &mut self.scene.descriptor_mut().camera;
 
         // update camera matrix
         camera.matrix = Matrix4::from_axis_angle(Vector3::unit_y(), Rad(time))
-            * Matrix4::look_at(
+            * Matrix4::look_at_rh(
                 Point3::new(4.0, 5.0, 4.0),
                 Point3::new(0.0, 1.0, 0.0),
                 Vector3::unit_y(),
@@ -97,7 +102,7 @@ impl App for MyApp {
             .unwrap();
 
         // the number of the shape which should be displayed
-        let laps = (time / (2.0 * PI)) as i32 % 3;
+        let laps: i32 = (time / (2.0 * PI)) as i32 % 3;
 
         // the timing for changing the drawn shape
         if laps != self.current_shape {
@@ -107,9 +112,9 @@ impl App for MyApp {
             self.scene.clear_objects();
             // laps == 0 => cube, laps == 1 => torus, laps == 2 => cylinder
             match laps {
-                0 => self.scene.add_objects(&self.cube.render_faces()),
-                1 => self.scene.add_objects(&self.torus.render_faces()),
-                _ => self.scene.add_objects(&self.cylinder.render_faces()),
+                0 => self.scene.add_object(&self.cube),
+                1 => self.scene.add_object(&self.torus),
+                _ => self.scene.add_object(&self.cylinder),
             };
         }
     }
@@ -148,7 +153,7 @@ fn cube() -> Solid {
 // modeling a torus
 fn torus() -> Shell {
     // put a vertex at the point (0, 0, 1).
-    let vertex: Vertex = builder::vertex(Point3::new(0.0, 0.0, 1.0));
+    let vertex = builder::vertex(Point3::new(0.0, 0.0, 1.0));
     // sweep the vertex along a circle
     let circle: Wire = builder::rsweep(
         // the reference to the vertex
@@ -176,7 +181,7 @@ fn torus() -> Shell {
 // modeling a cylinder
 fn cylinder() -> Solid {
     // put a vertex at the point (0, 0, -1).
-    let vertex: Vertex = builder::vertex(Point3::new(0.0, 0.0, -1.0));
+    let vertex = builder::vertex(Point3::new(0.0, 0.0, -1.0));
     // sweep the vertex along circle
     let wire: Wire = builder::rsweep(
         // the reference to the vertex

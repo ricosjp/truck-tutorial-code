@@ -15,7 +15,7 @@ impl App for MyApp {
     // constructor
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
         // Use default setting except position and posture
-        let camera = Camera::perspective_camera(
+        let camera: Camera = Camera::perspective_camera(
             // We will update it later, so we leave it as a unit matrix here.
             Matrix4::identity(),
             // the field of view. Default is Rad(PI / 4.0). This case, a little telescope.
@@ -27,17 +27,17 @@ impl App for MyApp {
         );
 
         // radius of circumscribed circle
-        let radius = 5.0 * f64::sqrt(2.0);
+        let radius: f64 = 5.0 * f64::sqrt(2.0);
         // Useful constants for lights placement.
-        let omega = [0.5, f64::sqrt(3.0) * 0.5];
+        let omega: [f64; 2] = [0.5, f64::sqrt(3.0) * 0.5];
 
         // positions of lights, the vertices of regular triangle
-        let position0 = Point3::new(radius * omega[0], 6.0, radius * omega[1]);
-        let position1 = Point3::new(-radius, 6.0, 0.0);
-        let position2 = Point3::new(radius * omega[0], 6.0, -radius * omega[1]);
+        let position0: Point3 = Point3::new(radius * omega[0], 6.0, radius * omega[1]);
+        let position1: Point3 = Point3::new(-radius, 6.0, 0.0);
+        let position2: Point3 = Point3::new(radius * omega[0], 6.0, -radius * omega[1]);
 
         // red light
-        let red_light = Light {
+        let red_light: Light = Light {
             // position of the red light
             position: position0,
             // red
@@ -47,7 +47,7 @@ impl App for MyApp {
         };
 
         // green light
-        let green_light = Light {
+        let green_light: Light = Light {
             // position of the green light
             position: position1,
             // green
@@ -57,7 +57,7 @@ impl App for MyApp {
         };
 
         // blue light
-        let blue_light = Light {
+        let blue_light: Light = Light {
             // position of the blue light
             position: position2,
             // blue
@@ -67,10 +67,10 @@ impl App for MyApp {
         };
 
         // the vector of lights
-        let lights = vec![red_light, green_light, blue_light];
+        let lights: Vec<Light> = vec![red_light, green_light, blue_light];
 
         // Create the scene
-        let mut scene = Scene::new(
+        let mut scene: Scene = Scene::new(
             // `DeviceHandler` is the toolchain of the structs provided from wgpu.
             // This allows the Scene to pass the information it receives from the CPU to the GPU.
             device_handler.clone(),
@@ -87,10 +87,13 @@ impl App for MyApp {
         );
 
         // Load the polygon from a wavefront obj file.
-        let polygon = polymesh::obj::read(include_bytes!("teapot.obj").as_ref()).unwrap();
+        let polygon: PolygonMesh =
+            polymesh::obj::read(include_bytes!("teapot.obj").as_ref()).unwrap();
         // Once the polygon data is in the form of an "instance".
         // This may seem wasteful to the beginning user, but this redundancy is useful for saving memory.
-        let instance = scene.create_instance(&polygon, &Default::default());
+        let instance: PolygonInstance = scene
+            .instance_creator() // <- instance is created by instance creator.
+            .create_polygon_instance(&polygon, &Default::default());
         // Sign up the polygon to the scene.
         scene.add_object(&instance);
 
@@ -101,10 +104,10 @@ impl App for MyApp {
     // This meshod is called every frame
     fn update(&mut self, _handler: &DeviceHandler) {
         // the seconds since the application started.
-        let time = self.scene.elapsed().as_secs_f64();
+        let time: f64 = self.scene.elapsed().as_secs_f64();
 
         // the mutable references to camera and lights.
-        let (camera, lights) = {
+        let (camera, lights): (&mut Camera, &mut Vec<Light>) = {
             // Reget the mutable reference to SceneDescriptor.
             let desc = self.scene.descriptor_mut();
             // the mutable references to camera and lights.
@@ -112,7 +115,7 @@ impl App for MyApp {
         };
 
         // rotation matrix
-        let rot = Matrix4::from_axis_angle(
+        let rot: Matrix4 = Matrix4::from_axis_angle(
             // the axis of rotation
             Vector3::unit_y(),
             // 1 radian per second
@@ -121,7 +124,7 @@ impl App for MyApp {
 
         // update camera matrix
         camera.matrix = rot
-            * Matrix4::look_at(
+            * Matrix4::look_at_rh(
                 Point3::new(5.0, 6.0, 5.0),
                 Point3::new(0.0, 1.5, 0.0),
                 Vector3::unit_y(),
@@ -136,8 +139,12 @@ impl App for MyApp {
     }
 
     // This method is called every frame.
-    fn render(&mut self, frame: &SwapChainFrame) { self.scene.render_scene(&frame.output.view) }
+    fn render(&mut self, frame: &SwapChainFrame) {
+        self.scene.render_scene(&frame.output.view)
+    }
 }
 
 // Run!
-fn main() { MyApp::run() }
+fn main() {
+    MyApp::run()
+}

@@ -14,9 +14,9 @@ impl App for MyApp {
     // constructor
     fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
         // Use default setting except position and posture
-        let mut camera = Camera::default();
+        let mut camera: Camera = Camera::default();
         // specify position and posture
-        camera.matrix = Matrix4::look_at(
+        camera.matrix = Matrix4::look_at_rh(
             // camera position
             Point3::new(5.0, 6.0, 5.0),
             // The camera looks to the center of the model.
@@ -31,12 +31,12 @@ impl App for MyApp {
         .unwrap();
 
         // Use default setting except the position
-        let mut light = Light::default();
+        let mut light: Light = Light::default();
         // It is safe to place the camera in the same position as the flash.
         light.position = camera.position();
 
         // Create the scene
-        let mut scene = Scene::new(
+        let mut scene: Scene = Scene::new(
             // `DeviceHandler` is the toolchain of the structs provided from wgpu.
             // This allows the Scene to pass the information it receives from the CPU to the GPU.
             device_handler.clone(),
@@ -53,10 +53,13 @@ impl App for MyApp {
         );
 
         // Load the polygon from a wavefront obj file.
-        let polygon = polymesh::obj::read(include_bytes!("teapot.obj").as_ref()).unwrap();
+        let polygon: PolygonMesh =
+            polymesh::obj::read(include_bytes!("teapot.obj").as_ref()).unwrap();
         // Once the polygon data is in the form of an "instance".
         // This may seem wasteful to the beginning user, but this redundancy is useful for saving memory.
-        let instance = scene.create_instance(&polygon, &Default::default());
+        let instance: PolygonInstance = scene
+            .instance_creator() // <- instance is created by instance creator.
+            .create_polygon_instance(&polygon, &Default::default());
         // Sign up the polygon to the scene.
         scene.add_object(&instance);
 
@@ -72,4 +75,6 @@ impl App for MyApp {
 }
 
 // Run!
-fn main() { MyApp::run() }
+fn main() {
+    MyApp::run()
+}
