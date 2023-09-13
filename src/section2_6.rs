@@ -1,15 +1,17 @@
 mod app; // Load the dropped submodule
-use app::App; // Use the trait app::App
+use app::*; // Use the trait app::App
 use std::f64::consts::PI;
+use std::sync::Arc;
+use truck_meshalgo::prelude::*;
+use truck_modeling::*;
 use truck_platform::*;
 use truck_rendimpl::*;
-use wgpu::{AdapterInfo, SwapChainFrame};
-use winit::{dpi::*, event::*, event_loop::ControlFlow};
+use winit::{dpi::*, event::*, event_loop::ControlFlow, window::Window};
 
 // the application handler
 struct MyApp {
     // scene
-    scene: Scene,
+    scene: WindowScene,
     // dragging flag
     rotate_flag: bool,
     // position of the cursor at the previous frame.
@@ -17,46 +19,50 @@ struct MyApp {
 }
 
 // Implement App to the empty struct
+#[async_trait(?Send)]
 impl App for MyApp {
     // constructor
-    fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
-        let mut scene: Scene = Scene::new(
-            device_handler.clone(),
-            &SceneDescriptor {
-                camera: Camera::perspective_camera(
-                    Matrix4::look_at_rh(
-                        Point3::new(1.5, 1.5, 1.5),
-                        Point3::origin(),
-                        Vector3::unit_y(),
-                    )
-                    .invert()
-                    .unwrap(),
-                    Rad(PI / 4.0),
-                    0.1,
-                    40.0,
-                ),
-                lights: vec![Light {
-                    position: Point3::new(1.5, 1.5, 1.5),
-                    color: Vector3::new(1.0, 1.0, 1.0),
-                    light_type: LightType::Point,
-                }],
+    async fn init(window: Arc<Window>) -> Self {
+        let mut scene = WindowScene::from_window(
+            window,
+            &WindowSceneDescriptor {
+                studio: StudioConfig {
+                    camera: Camera::perspective_camera(
+                        Matrix4::look_at_rh(
+                            Point3::new(1.5, 1.5, 1.5),
+                            Point3::origin(),
+                            Vector3::unit_y(),
+                        )
+                        .invert()
+                        .unwrap(),
+                        Rad(PI / 4.0),
+                        0.1,
+                        40.0,
+                    ),
+                    lights: vec![Light {
+                        position: Point3::new(1.5, 1.5, 1.5),
+                        color: Vector3::new(1.0, 1.0, 1.0),
+                        light_type: LightType::Point,
+                    }],
+                    ..Default::default()
+                },
                 ..Default::default()
             },
-        );
+        )
+        .await;
 
         // modeling the bottle and signup to the scene
         let bottle: Solid = bottle(1.4, 1.0, 0.6);
-        let instance: ShapeInstance = scene.instance_creator().create_shape_instance(
-            &bottle,
-            &ShapeInstanceDescriptor {
-                instance_state: InstanceState {
-                    // smooth plastic texture
-                    material: Material {
-                        albedo: Vector4::new(0.75, 0.75, 0.75, 1.0),
-                        reflectance: 0.2,
-                        roughness: 0.2,
-                        ambient_ratio: 0.02,
-                    },
+        let mesh = bottle.triangulation(0.01).to_polygon();
+        let instance: PolygonInstance = scene.instance_creator().create_instance(
+            &mesh,
+            &PolygonState {
+                // smooth plastic texture
+                material: Material {
+                    albedo: Vector4::new(0.75, 0.75, 0.75, 1.0),
+                    reflectance: 0.2,
+                    roughness: 0.2,
+                    ambient_ratio: 0.02,
                     ..Default::default()
                 },
                 ..Default::default()
@@ -79,8 +85,8 @@ impl App for MyApp {
             // use only y-delta
             MouseScrollDelta::LineDelta(_, y) => {
                 // get the mutable references to camera and light
-                let sc_desc = self.scene.descriptor_mut();
-                let (camera, light) = (&mut sc_desc.camera, &mut sc_desc.lights[0]);
+                let studio = self.scene.studio_config_mut();
+                let (camera, light) = (&mut studio.camera, &mut studio.lights[0]);
                 // Translation to the eye direction by 0.2 times the value obtained from the wheel.
                 let trans = Matrix4::from_translation(camera.eye_direction() * 0.2 * y as f64);
                 // move the camera and light
@@ -112,8 +118,8 @@ impl App for MyApp {
         let position = Vector2::new(position.x, position.y);
         if self.rotate_flag {
             // get the mutable references of camera and light
-            let desc = self.scene.descriptor_mut();
-            let (camera, light) = (&mut desc.camera, &mut desc.lights[0]);
+            let studio = self.scene.studio_config_mut();
+            let (camera, light) = (&mut studio.camera, &mut studio.lights[0]);
             // get the delta of cursor move
             let dir2d = position - self.prev_cursor;
             // Do nothing if the delta is so small.
@@ -139,9 +145,7 @@ impl App for MyApp {
     }
 
     // This method is called every frame.
-    fn render(&mut self, frame: &SwapChainFrame) {
-        self.scene.render_scene(&frame.output.view)
-    }
+    fn render(&mut self) { self.scene.render_frame() }
 }
 
 // modeling the body shape
@@ -239,6 +243,4 @@ fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
 }
 
 // Run!
-fn main() {
-    MyApp::run()
-}
+fn main() { MyApp::run() }

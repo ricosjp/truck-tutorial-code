@@ -1,10 +1,15 @@
 mod app;
 use app::*;
+use truck_meshalgo::tessellation::MeshableShape;
+
 use std::f64::consts::PI;
-use topology::Vertex;
+use std::sync::Arc;
+use winit::window::Window;
+
+use truck_meshalgo::prelude::*;
+use truck_modeling::*;
 use truck_platform::*;
 use truck_rendimpl::*;
-use wgpu::*;
 
 // size of the square
 const SQUARE_SIZE: usize = 5;
@@ -19,20 +24,21 @@ const SIDE_LENGTH: f64 = (SQUARE_SIZE + 1) as f64 * 1.5;
 // application handler
 struct MyApp {
     // scene
-    scene: Scene,
+    scene: WindowScene,
     // instances for render
-    instances: Vec<ShapeInstance>,
+    instances: Vec<PolygonInstance>,
 }
 
+#[async_trait(?Send)]
 impl App for MyApp {
-    fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> MyApp {
+    async fn init(window: Arc<Window>) -> MyApp {
         // disntace between camera and rendered square
         let camera_dist: f64 = SIDE_LENGTH / 2.0 / (PI / 8.0).tan();
 
         // temporary constants for light positions
         let a: f64 = SIDE_LENGTH / 2.0;
         let b: f64 = camera_dist / 2.0;
-        let scene_desc: SceneDescriptor = SceneDescriptor {
+        let studio = StudioConfig {
             camera: Camera::perspective_camera(
                 Matrix4::from_translation(camera_dist * Vector3::unit_z()),
                 Rad(PI / 4.0),
@@ -62,7 +68,7 @@ impl App for MyApp {
                 },
             ],
             // back ground color
-            background: Color {
+            background: wgpu::Color {
                 r: BACK_GROUND[0],
                 g: BACK_GROUND[1],
                 b: BACK_GROUND[2],
@@ -72,33 +78,42 @@ impl App for MyApp {
         };
 
         // create the scene
-        let mut scene: Scene = Scene::new(device_handler.clone(), &scene_desc);
+        let mut scene = WindowScene::from_window(
+            window,
+            &WindowSceneDescriptor {
+                studio,
+                ..Default::default()
+            },
+        )
+        .await;
 
         // modeling a unit cube
         let vertex: Vertex = builder::vertex(Point3::new(-0.5, -0.5, -0.5));
         let edge: Edge = builder::tsweep(&vertex, Vector3::unit_x());
         let face: Face = builder::tsweep(&edge, Vector3::unit_y());
         let cube: Solid = builder::tsweep(&face, Vector3::unit_z());
+        let mesh_cube = cube.triangulation(0.01).to_polygon();
 
         // create the original instance
-        let original_instance: ShapeInstance = scene
+        let original_instance: PolygonInstance = scene
             .instance_creator()
-            .create_shape_instance(&cube, &Default::default());
+            .create_instance(&mesh_cube, &Default::default());
 
         // vector for instances
-        let mut instances: Vec<ShapeInstance> = Vec::with_capacity(SQUARE_SIZE * SQUARE_SIZE);
+        let mut instances: Vec<PolygonInstance> = Vec::with_capacity(SQUARE_SIZE * SQUARE_SIZE);
 
         // loop
         for i in 0..SQUARE_SIZE {
             for j in 0..SQUARE_SIZE {
                 // create instance for drawing
-                let mut instance: ShapeInstance = original_instance.clone_instance();
+                let mut instance: PolygonInstance = original_instance.clone_instance();
                 // set material
                 instance.instance_state_mut().material = Material {
                     albedo: Vector4::from(CUBE_COLOR),
                     reflectance: i as f64 / (SQUARE_SIZE - 1) as f64,
                     roughness: j as f64 / (SQUARE_SIZE - 1) as f64,
                     ambient_ratio: 0.02,
+                    ..Default::default()
                 };
                 // sign up the object to the scene
                 scene.add_object(&instance);
@@ -110,7 +125,7 @@ impl App for MyApp {
         MyApp { scene, instances }
     }
 
-    fn update(&mut self, _: &DeviceHandler) {
+    fn render(&mut self) {
         // the seconds since the application started.
         let time: f64 = self.scene.elapsed().as_secs_f64();
 
@@ -139,15 +154,9 @@ impl App for MyApp {
             // update the scene
             self.scene.update_bind_group(instance);
         }
-    }
-
-    // This method is called every frame.
-    fn render(&mut self, frame: &SwapChainFrame) {
-        self.scene.render_scene(&frame.output.view);
+        self.scene.render_frame();
     }
 }
 
 // Run!
-fn main() {
-    MyApp::run()
-}
+fn main() { MyApp::run() }

@@ -1,29 +1,34 @@
 mod app; // Load the dropped submodule
-use app::App; // Use the trait app::App
+use app::*; // Use the trait app::App
 use std::f64::consts::PI;
+
+use std::sync::Arc;
+use winit::window::Window;
+
+use truck_meshalgo::prelude::*;
+use truck_modeling::*;
 use truck_platform::*;
 use truck_rendimpl::*;
-use topology::Vertex;
-use wgpu::{AdapterInfo, SwapChainFrame};
 
 // Declare the application handler
 struct MyApp {
     // scene
-    scene: Scene,
+    scene: WindowScene,
     // current drawn shape
     current_shape: i32,
     // the instance of cube
-    cube: ShapeInstance,
+    cube: PolygonInstance,
     // the instance of torus
-    torus: ShapeInstance,
+    torus: PolygonInstance,
     // the instance of cylinder
-    cylinder: ShapeInstance,
+    cylinder: PolygonInstance,
 }
 
 // Implement App to the empty struct
+#[async_trait(?Send)]
 impl App for MyApp {
     // constructor
-    fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
+    async fn init(window: Arc<Window>) -> Self {
         // radius of circumscribed circle
         let radius: f64 = 5.0 * f64::sqrt(2.0);
         // Useful constants for lights placement.
@@ -51,27 +56,33 @@ impl App for MyApp {
             },
         ];
 
-        // Create the scene
-        let scene: Scene = Scene::new(
-            device_handler.clone(),
-            &SceneDescriptor {
-                // use the default camera
+        let scene_desc = WindowSceneDescriptor {
+            studio: StudioConfig {
                 camera: Default::default(),
                 lights,
                 ..Default::default()
             },
-        );
+            ..Default::default()
+        };
+
+        // Create the scene
+        let scene: WindowScene = WindowScene::from_window(window, &scene_desc).await;
+
+        let mesh_cube = solid2mesh(&cube());
+        let mesh_torus = solid2mesh(&torus());
+        let mesh_cylinder = solid2mesh(&cylinder());
 
         // An instance is created by InstanceCreator.
         // This structure prepares the data necessary for instance creation at initialization time,
         // so using it around will improve performance.
         let creator: InstanceCreator = scene.instance_creator();
         // create cube instance
-        let cube: ShapeInstance = creator.create_shape_instance(&cube(), &Default::default());
+        let cube: PolygonInstance = creator.create_instance(&mesh_cube, &Default::default());
         // create torus instance
-        let torus: ShapeInstance = creator.create_shape_instance(&torus(), &Default::default());
+        let torus: PolygonInstance = creator.create_instance(&mesh_torus, &Default::default());
         // create cylinder instance
-        let cylinder: ShapeInstance = creator.create_shape_instance(&cylinder(), &Default::default());
+        let cylinder: PolygonInstance =
+            creator.create_instance(&mesh_cylinder, &Default::default());
 
         // Return the application handler
         MyApp {
@@ -84,12 +95,12 @@ impl App for MyApp {
     }
 
     // This meshod is called every frame
-    fn update(&mut self, _handler: &DeviceHandler) {
+    fn render(&mut self) {
         // the seconds since the application started.
         let time: f64 = self.scene.elapsed().as_secs_f64();
 
         // the mutable references to the camera
-        let camera: &mut Camera = &mut self.scene.descriptor_mut().camera;
+        let camera: &mut Camera = &mut self.scene.studio_config_mut().camera;
 
         // update camera matrix
         camera.matrix = Matrix4::from_axis_angle(Vector3::unit_y(), Rad(time))
@@ -117,10 +128,8 @@ impl App for MyApp {
                 _ => self.scene.add_object(&self.cylinder),
             };
         }
+        self.scene.render_frame();
     }
-
-    // This method is called every frame.
-    fn render(&mut self, frame: &SwapChainFrame) { self.scene.render_scene(&frame.output.view) }
 }
 
 // modeling a cube
@@ -202,6 +211,10 @@ fn cylinder() -> Solid {
         // sweep along the z-axis
         2.0 * Vector3::unit_z(),
     )
+}
+
+fn solid2mesh<Shape: MeshableShape>(shape: &Shape) -> PolygonMesh {
+    shape.triangulation(0.01).to_polygon()
 }
 
 // Run!

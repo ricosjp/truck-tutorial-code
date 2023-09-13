@@ -7,10 +7,21 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-winit = "0.24.0" # low-level crate for handling GUI systems
-futures = "0.3.12" # Abstractions for asynchronous programming. Necessary for communicate with GPU.
-truck-platform = "0.2.0" # graphic utility library based on wgpu
-truck-rendimpl = "0.2.0" # Visualization of shape and polygon mesh based on truck-platform
+async-trait = "0.1.73"
+winit = "0.28.6" # low-level crate for handling GUI systems
+futures = "0.3.28" # Abstractions for asynchronous programming. Necessary for communicate with GPU.
+truck-modeling = { git = "https://github.com/ricosjp/truck.git" }
+truck-meshalgo = { git = "https://github.com/ricosjp/truck.git" }
+truck-platform = { git = "https://github.com/ricosjp/truck.git" } # graphic utility library based on wgpu
+truck-rendimpl = { git = "https://github.com/ricosjp/truck.git" } # Visualization of shape and polygon mesh based on truck-platform
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+instant = { version = "0.1.12", features = [ "now" ] }
+pollster = "0.3.0"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+instant = { version = "0.1.12", features = [ "now", "wasm-bindgen" ] }
+wasm-bindgen-futures = "0.4.37"
 
 [[bin]]
 name = "section2_1"
