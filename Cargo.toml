@@ -25,24 +25,40 @@ wasm-bindgen-futures = "0.4.37"
 
 [[bin]]
 name = "section2_1"
-path = "src/section2_1.rs"
+path = "src/chapter2/section2_1.rs"
 
 [[bin]]
 name = "section2_2"
-path = "src/section2_2.rs"
+path = "src/chapter2/section2_2.rs"
 
 [[bin]]
 name = "section2_3"
-path = "src/section2_3.rs"
+path = "src/chapter2/section2_3.rs"
 
 [[bin]]
 name = "section2_4"
-path = "src/section2_4.rs"
+path = "src/chapter2/section2_4.rs"
 
 [[bin]]
-name = "section2_5"
-path = "src/section2_5.rs"
+name = "section4_1"
+path = "src/chapter4/section4_1.rs"
 
 [[bin]]
-name = "section2_6"
-path = "src/section2_6.rs"
+name = "section4_2"
+path = "src/chapter4/section4_2.rs"
+
+[[bin]]
+name = "section4_3"
+path = "src/chapter4/section4_3.rs"
+
+[[bin]]
+name = "section4_4"
+path = "src/chapter4/section4_4.rs"
+
+[[bin]]
+name = "section4_5"
+path = "src/chapter4/section4_5.rs"
+
+[[bin]]
+name = "section4_6"
+path = "src/chapter4/section4_6.rs"

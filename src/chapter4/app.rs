@@ -23,7 +23,9 @@ pub trait App: Sized + 'static {
     async fn init(window: Arc<Window>) -> Self;
     /// By overriding this function, you can change the display of the title bar.
     /// It is not possible to change the window while it is running.
-    fn app_title<'a>() -> Option<&'a str> { None }
+    fn app_title<'a>() -> Option<&'a str> {
+        None
+    }
     /// Default is `ControlFlow::WaitUntil(1 / 60 seconds)`.
     fn default_control_flow() -> ControlFlow {
         let next_frame_time = Instant::now() + Duration::from_nanos(16_666_667);
@@ -32,15 +34,21 @@ pub trait App: Sized + 'static {
     /// By overriding this function, one can set the rendering process for each frame.
     fn render(&mut self) {}
     /// By overriding this function, one can change the behavior when the window is resized.
-    fn resized(&mut self, _size: PhysicalSize<u32>) -> ControlFlow { Self::default_control_flow() }
+    fn resized(&mut self, _size: PhysicalSize<u32>) -> ControlFlow {
+        Self::default_control_flow()
+    }
     /// By overriding this function, one can change the behavior when the window is moved.
     fn moved(&mut self, _position: PhysicalPosition<i32>) -> ControlFlow {
         Self::default_control_flow()
     }
     /// By overriding this function, one can change the behavior when the X button is pushed.
-    fn closed_requested(&mut self) -> ControlFlow { ControlFlow::Exit }
+    fn closed_requested(&mut self) -> ControlFlow {
+        ControlFlow::Exit
+    }
     /// By overriding this function, one can change the behavior when the window is destoroyed.
-    fn destroyed(&mut self) -> ControlFlow { Self::default_control_flow() }
+    fn destroyed(&mut self) -> ControlFlow {
+        Self::default_control_flow()
+    }
     /// By overriding this function, one can change the behavior when a file is dropped to the window.
     fn dropped_file(&mut self, _path: std::path::PathBuf) -> ControlFlow {
         Self::default_control_flow()
@@ -128,11 +136,15 @@ pub trait App: Sized + 'static {
     }
     /// Run the application.
     #[inline]
-    fn run() { block_on(Self::async_run()) }
+    fn run() {
+        block_on(Self::async_run())
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn block_on<F: core::future::Future<Output = ()> + 'static>(f: F) { pollster::block_on(f); }
+pub fn block_on<F: core::future::Future<Output = ()> + 'static>(f: F) {
+    pollster::block_on(f);
+}
 
 #[cfg(target_arch = "wasm32")]
 pub fn block_on<F: core::future::Future<Output = ()> + 'static>(f: F) {
@@ -146,7 +158,9 @@ fn main() {
     struct MyApp;
     #[async_trait(?Send)]
     impl App for MyApp {
-        async fn init(_: Arc<Window>) -> Self { MyApp }
+        async fn init(_: Arc<Window>) -> Self {
+            MyApp
+        }
     }
     MyApp::run()
 }
