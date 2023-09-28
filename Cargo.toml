@@ -12,6 +12,7 @@ winit = "0.28.6" # low-level crate for handling GUI systems
 futures = "0.3.28" # Abstractions for asynchronous programming. Necessary for communicate with GPU.
 truck-modeling = { git = "https://github.com/ricosjp/truck.git" }
 truck-meshalgo = { git = "https://github.com/ricosjp/truck.git" }
+truck-stepio = { git = "https://github.com/ricosjp/truck.git" }
 truck-platform = { git = "https://github.com/ricosjp/truck.git" } # graphic utility library based on wgpu
 truck-rendimpl = { git = "https://github.com/ricosjp/truck.git" } # Visualization of shape and polygon mesh based on truck-platform
 
@@ -38,6 +39,22 @@ path = "src/chapter2/section2_3.rs"
 [[bin]]
 name = "section2_4"
 path = "src/chapter2/section2_4.rs"
+
+[[bin]]
+name = "section2_5"
+path = "src/chapter2/section2_5.rs"
+
+[[bin]]
+name = "section3_1"
+path = "src/chapter3/section3_1.rs"
+
+[[bin]]
+name = "section3_2"
+path = "src/chapter3/section3_2.rs"
+
+[[bin]]
+name = "section3_3"
+path = "src/chapter3/section3_3.rs"
 
 [[bin]]
 name = "section4_1"

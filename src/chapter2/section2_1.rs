@@ -15,7 +15,7 @@ fn main() {
     };
     // set the faces of vertices
     let faces = Faces::from_iter([[0, 1, 2]]);
-    // create polugon
+    // create polygon
     let polygon = PolygonMesh::new(attrs, faces);
 
     // create output obj file
