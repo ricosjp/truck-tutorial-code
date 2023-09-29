@@ -1,0 +1,23 @@
+[package]
+name = "chapter3"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+truck-modeling = { git = "https://github.com/ricosjp/truck.git" }
+truck-meshalgo = { git = "https://github.com/ricosjp/truck.git" }
+truck-stepio = { git = "https://github.com/ricosjp/truck.git" }
+
+[[bin]]
+name = "section3_1"
+path = "src/section3_1.rs"
+
+[[bin]]
+name = "section3_2"
+path = "src/section3_2.rs"
+
+[[bin]]
+name = "section3_3"
+path = "src/section3_3.rs"
