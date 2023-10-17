@@ -8,9 +8,6 @@ edition = "2021"
 [dependencies]
 async-trait = "0.1.73"
 winit = "0.28.6" # low-level crate for handling GUI systems
-futures = "0.3.28" # Abstractions for asynchronous programming. Necessary for communicate with GPU.
-truck-modeling = { git = "https://github.com/ricosjp/truck.git" }
-truck-meshalgo = { git = "https://github.com/ricosjp/truck.git" }
 truck-platform = { git = "https://github.com/ricosjp/truck.git" } # graphic utility library based on wgpu
 truck-rendimpl = { git = "https://github.com/ricosjp/truck.git" } # Visualization of shape and polygon mesh based on truck-platform
 
@@ -33,15 +30,3 @@ path = "src/section4_2.rs"
 [[bin]]
 name = "section4_3"
 path = "src/section4_3.rs"
-
-[[bin]]
-name = "section4_4"
-path = "src/section4_4.rs"
-
-[[bin]]
-name = "section4_5"
-path = "src/section4_5.rs"
-
-[[bin]]
-name = "section4_6"
-path = "src/section4_6.rs"

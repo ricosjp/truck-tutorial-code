@@ -37,9 +37,10 @@ fn hexahedron() -> PolygonMesh {
 }
 
 fn main() {
-    const DIVISION: usize = 8;
-    // hexa hexahedron polygon
+    // hexahedron polygon
     let hexa = hexahedron();
+    // Number to divide each side of a hexahedron
+    const DIVISION: usize = 8;
     let positions: Vec<Point3> = hexa
         .face_iter()
         .flat_map(|face| {

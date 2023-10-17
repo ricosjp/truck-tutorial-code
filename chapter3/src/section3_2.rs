@@ -2,25 +2,6 @@ use truck_meshalgo::prelude::*;
 use truck_modeling::*;
 use truck_stepio::out::*;
 
-fn save_shape(solid: &Solid, filename: &str) {
-    // output to polygonmesh
-    let mesh_with_topology = solid.triangulation(0.01);
-    let mesh = mesh_with_topology.to_polygon();
-    let obj_path = filename.to_string() + ".obj";
-    let mut obj = std::fs::File::create(&obj_path).unwrap();
-    obj::write(&mesh, &mut obj).unwrap();
-
-    // compress solid data.
-    let compressed = solid.compress();
-
-    // step format display
-    let display = CompleteStepDisplay::new(StepModel::from(&compressed), Default::default());
-    // content of step file
-    let step_string: String = display.to_string();
-    let step_path = filename.to_string() + ".step";
-    std::fs::write(&step_path, &step_string).unwrap();
-}
-
 // modeling a torus
 fn torus() -> Solid {
     // put a vertex at the point (0, 0, 1).
@@ -47,7 +28,7 @@ fn torus() -> Solid {
         // If the absolute value is no less than 2π radian, a closed shape will be generated.
         Rad(7.0),
     );
-	Solid::new(vec![boundary])
+    Solid::new(vec![boundary])
 }
 
 // modeling a cylinder
@@ -76,7 +57,26 @@ fn cylinder() -> Solid {
     )
 }
 
+fn save_shape(solid: &Solid, filename: &str) {
+    // output to polygonmesh
+    let mesh_with_topology = solid.triangulation(0.01);
+    let mesh = mesh_with_topology.to_polygon();
+    let obj_path = filename.to_string() + ".obj";
+    let mut obj = std::fs::File::create(&obj_path).unwrap();
+    obj::write(&mesh, &mut obj).unwrap();
+
+    // compress solid data.
+    let compressed = solid.compress();
+
+    // step format display
+    let display = CompleteStepDisplay::new(StepModel::from(&compressed), Default::default());
+    // content of step file
+    let step_string: String = display.to_string();
+    let step_path = filename.to_string() + ".step";
+    std::fs::write(&step_path, &step_string).unwrap();
+}
+
 fn main() {
-	save_shape(&torus(), "torus");
-	save_shape(&cylinder(), "cylinder");
+    save_shape(&torus(), "torus");
+    save_shape(&cylinder(), "cylinder");
 }

@@ -1,12 +1,5 @@
-use truck_meshalgo::prelude::*;
 use std::iter::FromIterator;
-
-fn write_polygon(polygon: &PolygonMesh, path: &str) {
-    // create output obj file
-    let mut obj = std::fs::File::create(path).unwrap();
-    // output polygon to obj file.
-    obj::write(polygon, &mut obj).unwrap();
-}
+use truck_meshalgo::prelude::*;
 
 fn trigonal_pyramid() -> PolygonMesh {
     let positions = vec![
@@ -19,12 +12,7 @@ fn trigonal_pyramid() -> PolygonMesh {
         positions,
         ..Default::default()
     };
-    let faces = Faces::from_iter([
-        [2, 1, 0],
-        [0, 1, 3],
-        [1, 2, 3],
-        [2, 0, 3],
-    ]);
+    let faces = Faces::from_iter([[2, 1, 0], [0, 1, 3], [1, 2, 3], [2, 0, 3]]);
     // create polygon
     PolygonMesh::new(attrs, faces)
 }
@@ -57,7 +45,14 @@ fn cube() -> PolygonMesh {
     PolygonMesh::new(attrs, faces)
 }
 
+fn write_polygon(polygon: &PolygonMesh, path: &str) {
+    // create output obj file
+    let mut obj = std::fs::File::create(path).unwrap();
+    // output polygon to obj file.
+    obj::write(polygon, &mut obj).unwrap();
+}
+
 fn main() {
-    write_polygon(&trigonal_pyramid(), "trigonal-pyramid.obj");    
-    write_polygon(&cube(), "cube.obj");    
+    write_polygon(&trigonal_pyramid(), "trigonal-pyramid.obj");
+    write_polygon(&cube(), "cube.obj");
 }

@@ -1,13 +1,6 @@
 use std::iter::FromIterator;
 use truck_meshalgo::prelude::*;
 
-fn write_polygon(polygon: &PolygonMesh, path: &str) {
-    // create output obj file
-    let mut obj = std::fs::File::create(path).unwrap();
-    // output polygon to obj file.
-    obj::write(polygon, &mut obj).unwrap();
-}
-
 fn tetrahedron() -> PolygonMesh {
     let a = f64::sqrt(3.0) / 3.0;
     let positions = vec![
@@ -53,26 +46,26 @@ fn hexahedron() -> PolygonMesh {
 
 fn octahedron() -> PolygonMesh {
     let positions = vec![
-        Point3::new(0.0, 0.0, 1.0),
-        Point3::new(1.0, 0.0, 0.0),
-        Point3::new(0.0, 1.0, 0.0),
         Point3::new(-1.0, 0.0, 0.0),
+        Point3::new(1.0, 0.0, 0.0),
         Point3::new(0.0, -1.0, 0.0),
+        Point3::new(0.0, 1.0, 0.0),
         Point3::new(0.0, 0.0, -1.0),
+        Point3::new(0.0, 0.0, 1.0),
     ];
     let attrs = StandardAttributes {
         positions,
         ..Default::default()
     };
     let faces = Faces::from_iter([
-        [0, 1, 2],
-        [0, 2, 3],
-        [0, 3, 4],
-        [0, 4, 1],
-        [5, 1, 4],
-        [5, 4, 3],
-        [5, 3, 2],
-        [5, 2, 1],
+        [0, 2, 5],
+        [3, 0, 5],
+        [1, 3, 5],
+        [2, 1, 5],
+        [0, 4, 2],
+        [3, 4, 0],
+        [1, 4, 3],
+        [2, 4, 1],
     ]);
     PolygonMesh::new(attrs, faces)
 }
@@ -172,10 +165,19 @@ fn icosahedron() -> PolygonMesh {
     )
 }
 
+fn write_polyhedron(mut polygon: PolygonMesh, path: &str) {
+    // create output obj file
+    let mut obj = std::fs::File::create(path).unwrap();
+    // add a normal to polyhedron. This will explained in the later sections.
+    polygon.add_naive_normals(true);
+    // output polygon to obj file.
+    obj::write(&polygon, &mut obj).unwrap();
+}
+
 fn main() {
-    write_polygon(&tetrahedron(), "tetrahedron.obj");
-    write_polygon(&hexahedron(), "hexahedron.obj");
-    write_polygon(&octahedron(), "octahedron.obj");
-    write_polygon(&dodecahedron(), "dodecahedron.obj");
-    write_polygon(&icosahedron(), "icosahedron.obj");
+    write_polyhedron(tetrahedron(), "tetrahedron.obj");
+    write_polyhedron(hexahedron(), "hexahedron.obj");
+    write_polyhedron(octahedron(), "octahedron.obj");
+    write_polyhedron(dodecahedron(), "dodecahedron.obj");
+    write_polyhedron(icosahedron(), "icosahedron.obj");
 }

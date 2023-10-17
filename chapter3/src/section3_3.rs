@@ -1,7 +1,7 @@
+use std::f64::consts::PI;
 use truck_meshalgo::prelude::*;
 use truck_modeling::*;
 use truck_stepio::out::*;
-use std::f64::consts::PI;
 
 fn save_shape(solid: &Solid, filename: &str) {
     // output to polygonmesh
@@ -116,6 +116,4 @@ fn bottle(height: f64, width: f64, thickness: f64) -> Solid {
     Solid::new(vec![body])
 }
 
-fn main() {
-	save_shape(&bottle(1.4, 1.0, 0.6), "bottle");
-}
+fn main() { save_shape(&bottle(1.4, 1.0, 0.6), "bottle"); }
