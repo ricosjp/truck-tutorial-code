@@ -8,9 +8,9 @@ fn write_polygon(polygon: &PolygonMesh, path: &str) {
 }
 
 fn main() {
-    // load the mesh created in the previous section.
+    // read the mesh created in the previous section.
     let mut mirror_ball = obj::read(include_bytes!("sphere.obj").as_slice()).unwrap();
-    // the mesh is not Closed, but Oriented.
+    // the mesh is not Closed but Oriented.
     println!(
         "default mirror ball shell condition: {:?}",
         mirror_ball.shell_condition()

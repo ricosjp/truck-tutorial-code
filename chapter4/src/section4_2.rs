@@ -38,10 +38,14 @@ impl App for MyApp {
         // It is safe to place the camera in the same position as the flash.
         light.position = camera.position();
 
+        // the setting of scene
         let scene_desc = WindowSceneDescriptor {
             studio: StudioConfig {
+                // A scene has only one camera.
                 camera,
+                // The argument is `Vec` since a scene can have several lights.
                 lights: vec![light],
+                // There are the other options. Look later!
                 ..Default::default()
             },
             ..Default::default()

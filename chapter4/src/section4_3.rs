@@ -1,12 +1,12 @@
 mod app; // Load the dropped submodule
 use app::*; // Use the trait app::App
+use truck_platform::*;
+use truck_rendimpl::*;
 
 use std::sync::Arc;
 use winit::window::Window;
 
 use std::f64::consts::PI;
-use truck_platform::*;
-use truck_rendimpl::*;
 
 // Declare the application handler, a struct with a scene
 struct MyApp {
@@ -110,7 +110,7 @@ impl App for MyApp {
 
         // the mutable references to camera and lights.
         let (camera, lights): (&mut Camera, &mut Vec<Light>) = {
-            // Reget the mutable reference to SceneDescriptor.
+            // Reget the mutable reference to StudioConfig.
             let studio = self.scene.studio_config_mut();
             // the mutable references to camera and lights.
             (&mut studio.camera, &mut studio.lights)

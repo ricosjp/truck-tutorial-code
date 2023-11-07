@@ -129,33 +129,37 @@ fn icosahedron() -> PolygonMesh {
         // iterator on all faces of the dodecahedron
         .face_iter()
         .map(|face| {
-            // sum of the positional vector of vertices
-            let sum = face
+            // If we add the coordinates of the vertices of a face and normalize them, we can normalize the center of gravity.
+            let normalized_gravity = face
                 .iter()
+                // we can obtain the coordinate index by `vertex.pos`
+                // Convert coordinate data to `Vector3` with `Point3::to_vec` for easy operation
                 .map(|vertex| dodeca_positions[vertex.pos].to_vec())
-                .sum::<Vector3>();
-            // normalized vector of the center of gravity
-            Point3::from_vec(sum.normalize())
+                .sum::<Vector3>()
+                .normalize();
+            Point3::from_vec(normalized_gravity)
         })
         .collect();
-    let faces: Faces = (0..20)
+    let mut faces: Faces = (0..20)
         .map(|i| {
             // enumerate indices of all faces of dodecahedron which contains `i`
-            let mut face: Vec<usize> = dodeca
+            dodeca
                 .face_iter()
                 .enumerate()
+                // Convert `usize` to `StandardVertex` by `Into::into()`, and checks whether the vertex is included in the face.
                 .filter(|(_, dodeca_face)| dodeca_face.contains(&i.into()))
                 .map(|(idx, _)| idx)
-                .collect();
-            let p: Vec<Point3> = face.iter().map(|idx| positions[*idx]).collect();
-            let face_center = (p[0].to_vec() + p[1].to_vec() + p[2].to_vec()) / 3.0;
-            let face_normal = (p[1] - p[0]).cross(p[2] - p[0]).normalize();
-            if face_center.dot(face_normal) < 0.0 {
-                face.swap(0, 1);
-            }
-            face
+                .collect::<Vec<usize>>()
         })
         .collect();
+    faces.iter_mut().for_each(|face| {
+        let p: Vec<Point3> = face.iter().map(|idx| positions[*idx]).collect();
+        let face_center = p[0].to_vec() + p[1].to_vec() + p[2].to_vec();
+        let face_normal = (p[1] - p[0]).cross(p[2] - p[0]).normalize();
+        if face_center.dot(face_normal) < 0.0 {
+            face.swap(0, 1);
+        }
+    });
     PolygonMesh::new(
         StandardAttributes {
             positions,
@@ -168,7 +172,7 @@ fn icosahedron() -> PolygonMesh {
 fn write_polyhedron(mut polygon: PolygonMesh, path: &str) {
     // create output obj file
     let mut obj = std::fs::File::create(path).unwrap();
-    // add a normal to polyhedron. This will explained in the later sections.
+    // add a normal to polyhedron. This will be learned in the later sections.
     polygon.add_naive_normals(true);
     // output polygon to obj file.
     obj::write(&polygon, &mut obj).unwrap();
