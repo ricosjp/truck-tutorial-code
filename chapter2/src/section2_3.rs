@@ -152,8 +152,8 @@ fn icosahedron() -> PolygonMesh {
                 .collect::<Vec<usize>>()
         })
         .collect();
-    faces.iter_mut().for_each(|face| {
-        let p: Vec<Point3> = face.iter().map(|idx| positions[*idx]).collect();
+    faces.face_iter_mut().for_each(|face| {
+        let p: Vec<Point3> = face.iter().map(|vertex| positions[vertex.pos]).collect();
         let face_center = p[0].to_vec() + p[1].to_vec() + p[2].to_vec();
         let face_normal = (p[1] - p[0]).cross(p[2] - p[0]).normalize();
         if face_center.dot(face_normal) < 0.0 {
