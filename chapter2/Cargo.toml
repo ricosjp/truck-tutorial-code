@@ -1,0 +1,29 @@
+[package]
+name = "chapter2"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+truck-meshalgo = "0.4.0"
+
+[[bin]]
+name = "section2_1"
+path = "src/section2_1.rs"
+
+[[bin]]
+name = "section2_2"
+path = "src/section2_2.rs"
+
+[[bin]]
+name = "section2_3"
+path = "src/section2_3.rs"
+
+[[bin]]
+name = "section2_4"
+path = "src/section2_4.rs"
+
+[[bin]]
+name = "section2_5"
+path = "src/section2_5.rs"

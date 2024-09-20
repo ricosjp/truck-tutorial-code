@@ -1,37 +1,7 @@
-[package]
-name = "truck-tutorial-code"
-version = "0.1.0"
-authors = ["Yoshinori Tanimura <tanimura@ricos.co.jp>"]
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-winit = "0.24.0" # low-level crate for handling GUI systems
-futures = "0.3.12" # Abstractions for asynchronous programming. Necessary for communicate with GPU.
-truck-platform = "0.2.0" # graphic utility library based on wgpu
-truck-rendimpl = "0.2.0" # Visualization of shape and polygon mesh based on truck-platform
-
-[[bin]]
-name = "section2_1"
-path = "src/section2_1.rs"
-
-[[bin]]
-name = "section2_2"
-path = "src/section2_2.rs"
-
-[[bin]]
-name = "section2_3"
-path = "src/section2_3.rs"
-
-[[bin]]
-name = "section2_4"
-path = "src/section2_4.rs"
-
-[[bin]]
-name = "section2_5"
-path = "src/section2_5.rs"
-
-[[bin]]
-name = "section2_6"
-path = "src/section2_6.rs"
+[workspace]
+resolver = "2"
+members = [
+	"chapter2",
+	"chapter3",
+	"chapter4",
+]

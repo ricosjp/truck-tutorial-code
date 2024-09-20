@@ -1,18 +1,21 @@
 mod app; // Load the dropped submodule
-use app::App; // Use the trait app::App
+use app::*; // Use the trait app::App
 use truck_platform::*;
 use truck_rendimpl::*;
-use wgpu::{AdapterInfo, SwapChainFrame};
+
+use std::sync::Arc;
+use winit::window::Window;
 
 // Declare the application handler, a struct with a scene
 struct MyApp {
-    scene: Scene,
+    scene: WindowScene,
 }
 
 // Make MyApp an application handler by implementing App
+#[async_trait(?Send)]
 impl App for MyApp {
     // constructor
-    fn init(device_handler: &DeviceHandler, _: AdapterInfo) -> Self {
+    async fn init(window: Arc<Window>) -> Self {
         // Use default setting except position and posture
         let mut camera: Camera = Camera::default();
         // specify position and posture
@@ -35,14 +38,9 @@ impl App for MyApp {
         // It is safe to place the camera in the same position as the flash.
         light.position = camera.position();
 
-        // Create the scene
-        let mut scene: Scene = Scene::new(
-            // `DeviceHandler` is the toolchain of the structs provided from wgpu.
-            // This allows the Scene to pass the information it receives from the CPU to the GPU.
-            device_handler.clone(),
-            // This passes only a reference. In fact, it would be better to pass the entity,
-            // but we are trying to match the operability to wgpu.
-            &SceneDescriptor {
+        // the setting of scene
+        let scene_desc = WindowSceneDescriptor {
+            studio: StudioConfig {
                 // A scene has only one camera.
                 camera,
                 // The argument is `Vec` since a scene can have several lights.
@@ -50,7 +48,11 @@ impl App for MyApp {
                 // There are the other options. Look later!
                 ..Default::default()
             },
-        );
+            ..Default::default()
+        };
+
+        // Create the scene
+        let mut scene = WindowScene::from_window(window, &scene_desc).await;
 
         // Load the polygon from a wavefront obj file.
         let polygon: PolygonMesh =
@@ -59,7 +61,7 @@ impl App for MyApp {
         // This may seem wasteful to the beginning user, but this redundancy is useful for saving memory.
         let instance: PolygonInstance = scene
             .instance_creator() // <- instance is created by instance creator.
-            .create_polygon_instance(&polygon, &Default::default());
+            .create_instance(&polygon, &Default::default());
         // Sign up the polygon to the scene.
         scene.add_object(&instance);
 
@@ -68,13 +70,11 @@ impl App for MyApp {
     }
 
     // This method is called every frame.
-    fn render(&mut self, frame: &SwapChainFrame) {
+    fn render(&mut self) {
         // scene draws a picture to the window.
-        self.scene.render_scene(&frame.output.view);
+        self.scene.render_frame();
     }
 }
 
 // Run!
-fn main() {
-    MyApp::run()
-}
+fn main() { MyApp::run() }

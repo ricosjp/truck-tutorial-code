@@ -1,0 +1,42 @@
+[package]
+name = "chapter4"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# use async function in trait declaration
+async-trait = "0.1.82"
+# low-level crate for handling GUI systems
+winit = "0.30.5"
+# graphic utility library based on wgpu
+truck-platform = "0.6.0"
+# Visualization of shape and polygon mesh based on truck-platform
+truck-rendimpl = "0.6.0"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# Used to run code common to wasm build.
+instant = { version = "0.1.13", features = [ "now" ] }
+# Abstractions for asynchronous programming. Necessary for communicate with GPU.
+pollster = "0.3.0"
+
+# Commentary on wasm is omitted.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+instant = { version = "0.1.13", features = [ "now", "wasm-bindgen" ] }
+
+[[bin]]
+name = "section4_1"
+path = "src/section4_1.rs"
+
+[[bin]]
+name = "section4_2"
+path = "src/section4_2.rs"
+
+[[bin]]
+name = "section4_3"
+path = "src/section4_3.rs"
+
+[[bin]]
+name = "section4_4"
+path = "src/section4_4.rs"

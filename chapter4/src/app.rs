@@ -1,32 +1,65 @@
 //! A GUI framework module providing MFC-like API.
 
-use std::sync::{Arc, Mutex};
-use std::time::*;
-use truck_platform::{wgpu::*, DeviceHandler};
+// Copyright © 2021 RICOS
+// Apache license 2.0
+#![allow(deprecated)]
+
+pub use async_trait::async_trait;
+use std::sync::Arc;
+//use std::time::Duration;
 use winit::dpi::*;
 use winit::event::*;
-use winit::event_loop::ControlFlow;
+use winit::event_loop::{ActiveEventLoop, ControlFlow as WControlFlow};
+use winit::window::Window;
+
+#[cfg(not(target_arch = "wasm32"))]
+use std::time::Instant;
+#[cfg(target_arch = "wasm32")]
+use web_time::Instant;
+
+#[allow(unused)]
+#[derive(Clone, Copy, Debug)]
+pub enum ControlFlow {
+    Poll,
+    Exit,
+    Wait,
+    WaitUntil(Instant),
+}
+
+impl TryFrom<ControlFlow> for WControlFlow {
+    type Error = ();
+    fn try_from(value: ControlFlow) -> Result<Self, Self::Error> {
+        match value {
+            ControlFlow::Exit => Err(()),
+            ControlFlow::Poll => Ok(WControlFlow::Poll),
+            ControlFlow::Wait => Ok(WControlFlow::Wait),
+            ControlFlow::WaitUntil(x) => Ok(WControlFlow::WaitUntil(x)),
+        }
+    }
+}
 
 /// The framework of applications with `winit`.
 /// The main function of this file is the smallest usecase of this trait.
+#[async_trait(?Send)]
 pub trait App: Sized + 'static {
     /// Initialize application
     /// # Arguments
     /// - handler: `DeviceHandler` provided by `wgpu`
-    /// - info: informations of device and backend
-    fn init(handler: &DeviceHandler, info: AdapterInfo) -> Self;
+    /// - info: information of device and backend
+    async fn init(window: Arc<Window>) -> Self;
     /// By overriding this function, you can change the display of the title bar.
     /// It is not possible to change the window while it is running.
     fn app_title<'a>() -> Option<&'a str> { None }
     /// Default is `ControlFlow::WaitUntil(1 / 60 seconds)`.
     fn default_control_flow() -> ControlFlow {
+        /*
         let next_frame_time = Instant::now() + Duration::from_nanos(16_666_667);
         ControlFlow::WaitUntil(next_frame_time)
+        */
+        ControlFlow::Poll
     }
-    /// By overriding this function, one can set the update process for each frame.
-    fn update(&mut self, _handler: &DeviceHandler) {}
     /// By overriding this function, one can set the rendering process for each frame.
-    fn render(&mut self, _frame: &SwapChainFrame) {}
+    fn render(&mut self) {}
     /// By overriding this function, one can change the behavior when the window is resized.
     fn resized(&mut self, _size: PhysicalSize<u32>) -> ControlFlow { Self::default_control_flow() }
     /// By overriding this function, one can change the behavior when the window is moved.
@@ -46,7 +79,7 @@ pub trait App: Sized + 'static {
         Self::default_control_flow()
     }
     /// By overriding this function, one can change the behavior when a keybourd input occurs.
-    fn keyboard_input(&mut self, _input: KeyboardInput, _is_synthetic: bool) -> ControlFlow {
+    fn keyboard_input(&mut self, _input: KeyEvent, _is_synthetic: bool) -> ControlFlow {
         Self::default_control_flow()
     }
     /// By overriding this function, one can change the behavior when a mouse input occurs.
@@ -61,57 +94,50 @@ pub trait App: Sized + 'static {
     fn cursor_moved(&mut self, _position: PhysicalPosition<f64>) -> ControlFlow {
         Self::default_control_flow()
     }
-    /// Run the application.
-    fn run() {
-        let event_loop = winit::event_loop::EventLoop::new();
-        let mut wb = winit::window::WindowBuilder::new();
+    /// Run the application in the future.
+    async fn async_run() {
+        let event_loop = winit::event_loop::EventLoop::new().unwrap();
+        let mut wa = winit::window::Window::default_attributes();
         if let Some(title) = Self::app_title() {
-            wb = wb.with_title(title);
+            wa.title = title.to_owned();
         }
-        let window = wb.build(&event_loop).unwrap();
-        let size = window.inner_size();
-        let instance = Instance::new(BackendBit::PRIMARY);
-        let surface = unsafe { instance.create_surface(&window) };
+        let window = event_loop
+            .create_window(wa)
+            .expect("failed to build window");
+        #[cfg(target_arch = "wasm32")]
+        {
+            std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+            console_log::init().expect("could not initialize logger");
+            use winit::platform::web::WindowExtWebSys;
+            // On wasm, append the canvas to the document body
+            web_sys::window()
+                .and_then(|win| win.document())
+                .and_then(|doc| doc.body())
+                .and_then(|body| {
+                    let canvas = window.canvas()?;
+                    canvas.set_width(500);
+                    canvas.set_height(500);
+                    body.append_child(&web_sys::Element::from(canvas)).ok()
+                })
+                .expect("couldn't append canvas to document body");
+        }
 
-        let (device, queue, info) = futures::executor::block_on(init_device(&instance, &surface));
+        let window = Arc::new(window);
+        let mut app = Self::init(Arc::clone(&window)).await;
 
-        let sc_desc = SwapChainDescriptor {
-            usage: TextureUsage::OUTPUT_ATTACHMENT,
-            format: TextureFormat::Bgra8Unorm,
-            width: size.width,
-            height: size.height,
-            present_mode: PresentMode::Mailbox,
-        };
-
-        let mut swap_chain = device.create_swap_chain(&surface, &sc_desc);
-        let handler = DeviceHandler::new(
-            Arc::new(device),
-            Arc::new(queue),
-            Arc::new(Mutex::new(sc_desc)),
-        );
-
-        let mut app = Self::init(&handler, info);
-
-        event_loop.run(move |ev, _, control_flow| {
-            *control_flow = match ev {
-                Event::MainEventsCleared => {
+        let routine = move |ev: Event<()>, target: &ActiveEventLoop| {
+            let control_flow = match ev {
+                Event::NewEvents(_) => {
                     window.request_redraw();
-                    Self::default_control_flow()
-                }
-                Event::RedrawRequested(_) => {
-                    app.update(&handler);
-                    let frame = swap_chain
-                        .get_current_frame()
-                        .expect("Timeout when acquiring next swap chain texture");
-                    app.render(&frame);
                     Self::default_control_flow()
                 }
                 Event::WindowEvent { event, .. } => match event {
                     WindowEvent::Resized(size) => {
-                        let mut sc_desc = handler.lock_sc_desc().unwrap();
-                        sc_desc.width = size.width;
-                        sc_desc.height = size.height;
-                        swap_chain = handler.device().create_swap_chain(&surface, &sc_desc);
+                        app.resized(size);
+                        Self::default_control_flow()
+                    }
+                    WindowEvent::RedrawRequested => {
+                        app.render();
                         Self::default_control_flow()
                     }
                     WindowEvent::Moved(position) => app.moved(position),
@@ -120,10 +146,10 @@ pub trait App: Sized + 'static {
                     WindowEvent::DroppedFile(path) => app.dropped_file(path),
                     WindowEvent::HoveredFile(path) => app.hovered_file(path),
                     WindowEvent::KeyboardInput {
-                        input,
+                        event,
                         is_synthetic,
                         ..
-                    } => app.keyboard_input(input, is_synthetic),
+                    } => app.keyboard_input(event, is_synthetic),
                     WindowEvent::MouseInput { state, button, .. } => app.mouse_input(state, button),
                     WindowEvent::MouseWheel { delta, phase, .. } => app.mouse_wheel(delta, phase),
                     WindowEvent::CursorMoved { position, .. } => app.cursor_moved(position),
@@ -131,31 +157,30 @@ pub trait App: Sized + 'static {
                 },
                 _ => Self::default_control_flow(),
             };
-        })
+            match control_flow {
+                ControlFlow::Exit => target.exit(),
+                _ => target.set_control_flow(control_flow.try_into().unwrap()),
+            }
+        };
+        #[cfg(not(target_arch = "wasm32"))]
+        event_loop.run(routine).unwrap();
+        #[cfg(target_arch = "wasm32")]
+        {
+            use winit::platform::web::EventLoopExtWebSys;
+            event_loop.spawn(routine);
+        }
     }
+    /// Run the application.
+    #[inline]
+    fn run() { block_on(Self::async_run()) }
 }
 
-async fn init_device(instance: &Instance, surface: &Surface) -> (Device, Queue, AdapterInfo) {
-    let adapter = instance
-        .request_adapter(&RequestAdapterOptions {
-            power_preference: PowerPreference::Default,
-            compatible_surface: Some(surface),
-        })
-        .await
-        .unwrap();
+#[cfg(not(target_arch = "wasm32"))]
+pub fn block_on<F: core::future::Future<Output = ()> + 'static>(f: F) { pollster::block_on(f); }
 
-    let tuple = adapter
-        .request_device(
-            &DeviceDescriptor {
-                features: Default::default(),
-                limits: Limits::default(),
-                shader_validation: true,
-            },
-            None,
-        )
-        .await
-        .unwrap();
-    (tuple.0, tuple.1, adapter.get_info())
+#[cfg(target_arch = "wasm32")]
+pub fn block_on<F: core::future::Future<Output = ()> + 'static>(f: F) {
+    wasm_bindgen_futures::spawn_local(f);
 }
 
 /// The smallest example of the trait `App`.
@@ -163,8 +188,9 @@ async fn init_device(instance: &Instance, surface: &Surface) -> (Device, Queue, 
 #[allow(dead_code)]
 fn main() {
     struct MyApp;
+    #[async_trait(?Send)]
     impl App for MyApp {
-        fn init(_: &DeviceHandler, _: AdapterInfo) -> MyApp { MyApp }
+        async fn init(_: Arc<Window>) -> Self { MyApp }
     }
     MyApp::run()
 }
