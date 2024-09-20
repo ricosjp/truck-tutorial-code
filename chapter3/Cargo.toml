@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-truck-modeling = { git = "https://github.com/ricosjp/truck.git" }
-truck-meshalgo = { git = "https://github.com/ricosjp/truck.git" }
-truck-stepio = { git = "https://github.com/ricosjp/truck.git" }
+truck-modeling = "0.6.0"
+truck-meshalgo = "0.4.0"
+truck-stepio = "0.3.0"
 
 [[bin]]
 name = "section3_1"

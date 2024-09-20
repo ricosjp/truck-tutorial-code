@@ -4,7 +4,7 @@ use std::f64::consts::PI;
 use std::sync::Arc;
 use truck_platform::*;
 use truck_rendimpl::*;
-use winit::{dpi::*, event::*, event_loop::ControlFlow, window::Window};
+use winit::{dpi::*, event::*, window::Window};
 
 // the application handler
 struct MyApp {

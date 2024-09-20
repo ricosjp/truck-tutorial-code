@@ -7,23 +7,23 @@ edition = "2021"
 
 [dependencies]
 # use async function in trait declaration
-async-trait = "0.1.73"
+async-trait = "0.1.82"
 # low-level crate for handling GUI systems
-winit = "0.28.6"
+winit = "0.30.5"
 # graphic utility library based on wgpu
-truck-platform = { git = "https://github.com/ricosjp/truck.git" }
+truck-platform = "0.6.0"
 # Visualization of shape and polygon mesh based on truck-platform
-truck-rendimpl = { git = "https://github.com/ricosjp/truck.git" }
+truck-rendimpl = "0.6.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # Used to run code common to wasm build.
-instant = { version = "0.1.12", features = [ "now" ] }
+instant = { version = "0.1.13", features = [ "now" ] }
 # Abstractions for asynchronous programming. Necessary for communicate with GPU.
 pollster = "0.3.0"
 
 # Commentary on wasm is omitted.
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-instant = { version = "0.1.12", features = [ "now", "wasm-bindgen" ] }
+instant = { version = "0.1.13", features = [ "now", "wasm-bindgen" ] }
 
 [[bin]]
 name = "section4_1"

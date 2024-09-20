@@ -17,7 +17,7 @@ fn main() {
     );
 
     // put together same positions
-    mirror_ball.put_together_same_attrs();
+    mirror_ball.put_together_same_attrs(1.0e-3);
     // the mesh is Closed!
     println!(
         "after apply filter `put_together_same_attrs`: {:?}",
